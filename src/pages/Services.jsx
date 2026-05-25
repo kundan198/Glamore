@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -125,6 +125,7 @@ export default function Services() {
   const tabsRef = useRef(null)
   const tabsWrapRef = useRef(null)
   const contentRef = useRef(null)
+  const shouldScrollToServices = useRef(false)
 
   useGSAP(() => {
     gsap.fromTo('.srv-hero-title',
@@ -149,9 +150,23 @@ export default function Services() {
     })
   }
 
+  const scrollToServicesAfterLayout = () => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(scrollToServices)
+    })
+  }
+
+  useEffect(() => {
+    if (!shouldScrollToServices.current) return
+    shouldScrollToServices.current = false
+    scrollToServicesAfterLayout()
+  }, [active])
+
   const handleTabChange = (id) => {
+    shouldScrollToServices.current = true
+
     if (id === active) {
-      scrollToServices()
+      scrollToServicesAfterLayout()
       return
     }
 
@@ -159,7 +174,6 @@ export default function Services() {
       opacity: 0, y: 18, duration: 0.24, ease: 'power2.inOut',
       onComplete: () => {
         setActive(id)
-        requestAnimationFrame(scrollToServices)
         gsap.fromTo(contentRef.current,
           { opacity: 0, y: 18 },
           { opacity: 1, y: 0, duration: 0.46, ease: 'power3.out' }
