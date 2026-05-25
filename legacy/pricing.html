@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing — Glamore Premium Beauty Studio</title>
+  <meta name="description" content="Transparent pricing for all Glamore beauty services — hair styling, nail art, makeup, bridal packages and full luxury studio experiences." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .price-table { width:100%; border-collapse:collapse; margin-bottom:var(--space-8); }
+    .price-table th {
+      text-align:left; padding:var(--space-4) var(--space-5);
+      font-size:var(--fs-xs); font-weight:700; letter-spacing:0.1em;
+      text-transform:uppercase; color:var(--gold);
+      background:var(--plum); border-bottom:2px solid rgba(201,169,110,0.3);
+    }
+    .price-table td {
+      padding:var(--space-4) var(--space-5);
+      font-size:var(--fs-sm); color:var(--text-mid);
+      border-bottom:1px solid var(--border);
+      vertical-align:middle;
+    }
+    .price-table tr:last-child td { border-bottom:none; }
+    .price-table tr:hover td { background:var(--gold-xlight); }
+    .price-table td:first-child { color:var(--text-dark); font-weight:500; }
+    .price-table td:last-child { color:var(--gold-dark); font-weight:700; text-align:right; }
+    .price-category {
+      background:var(--white); border-radius:var(--radius-xl);
+      overflow:hidden; margin-bottom:var(--space-6);
+      border:1px solid var(--border); box-shadow:var(--shadow-sm);
+    }
+    .price-category-header {
+      padding:var(--space-6) var(--space-8);
+      background:linear-gradient(135deg,var(--plum) 0%,var(--plum-mid) 100%);
+      display:flex; align-items:center; gap:var(--space-4);
+    }
+    .price-category-header h3 { color:var(--white); font-size:var(--fs-xl); margin:0; }
+    .price-cat-icon { font-size:2rem; }
+    .faq-item {
+      border-bottom:1px solid var(--border);
+      padding:var(--space-5) 0;
+    }
+    .faq-item:last-child { border-bottom:none; }
+    .faq-question {
+      display:flex; justify-content:space-between; align-items:center;
+      cursor:pointer; gap:var(--space-4);
+    }
+    .faq-question h5 { font-size:var(--fs-base); color:var(--text-dark); transition:color 0.2s; }
+    .faq-question:hover h5 { color:var(--gold); }
+    .faq-toggle { font-size:var(--fs-lg); color:var(--gold); transition:transform 0.3s; flex-shrink:0; }
+    .faq-answer { display:none; padding-top:var(--space-4); }
+    .faq-answer p { font-size:var(--fs-sm); color:var(--text-mid); line-height:1.8; }
+    .faq-item.open .faq-toggle { transform:rotate(45deg); }
+    .faq-item.open .faq-answer { display:block; }
+  </style>
+</head>
+<body>
+
+<div class="page-loader"><div class="loader-logo">Glamore</div></div>
+
+<nav class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-main">Glamore</span><span class="nav-logo-tagline">Premium Beauty Studio</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html"    class="nav-link">Home</a></li>
+      <li><a href="about.html"    class="nav-link">About</a></li>
+      <li><a href="services.html" class="nav-link">Services</a></li>
+      <li><a href="gallery.html"  class="nav-link">Gallery</a></li>
+      <li><a href="pricing.html"  class="nav-link active">Pricing</a></li>
+      <li><a href="team.html"     class="nav-link">Team</a></li>
+      <li><a href="contact.html"  class="nav-link">Contact</a></li>
+    </ul>
+    <div class="nav-cta"><a href="booking.html" class="btn btn-gold btn-sm">Book Now</a></div>
+    <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html" class="nav-link">Home</a><a href="about.html" class="nav-link">About</a><a href="services.html" class="nav-link">Services</a><a href="gallery.html" class="nav-link">Gallery</a><a href="pricing.html" class="nav-link">Pricing</a><a href="team.html" class="nav-link">Team</a><a href="contact.html" class="nav-link">Contact</a>
+  <a href="booking.html" class="btn btn-gold">Book Appointment</a>
+</div>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-label">Investment</div>
+    <h1>Our <em style="color:var(--gold);font-style:italic;">Pricing</em></h1>
+    <p>Transparent, honest pricing for every service — because luxury should never mean guesswork.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span><span class="current">Pricing</span></div>
+  </div>
+</section>
+
+<!-- Packages -->
+<section class="section bg-cream">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <span class="section-label">Choose Your Experience</span>
+      <h2 class="section-title">Studio <em>Packages</em></h2>
+      <div class="divider-gold centered"></div>
+      <p class="section-subtitle">All packages include a complimentary consultation and use of our luxury studio amenities.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <div class="pricing-card delay-1">
+        <div class="pricing-tier">Classic</div>
+        <div class="pricing-name">The Essentials</div>
+        <div class="pricing-desc">Everyday beauty, expertly done</div>
+        <div class="pricing-price">
+          <span class="price-currency">$</span>
+          <span class="price-amount">89</span>
+          <span class="price-period">/session</span>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><div class="check-icon">✓</div>Style Consultation</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>One Service Treatment</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Complimentary Styling Tips</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Beverage on Arrival</li>
+          <li class="pricing-feature"><div class="check-icon" style="background:var(--cream-dark);color:var(--text-light);">✗</div><span style="opacity:0.5">After-Care Kit</span></li>
+          <li class="pricing-feature"><div class="check-icon" style="background:var(--cream-dark);color:var(--text-light);">✗</div><span style="opacity:0.5">Private Suite</span></li>
+        </ul>
+        <a href="booking.html" class="btn btn-outline-gold" style="width:100%;justify-content:center;">Book This Package</a>
+      </div>
+      <div class="pricing-card featured delay-2">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-tier">Signature</div>
+        <div class="pricing-name">The Glamore</div>
+        <div class="pricing-desc">Our signature full-glam experience</div>
+        <div class="pricing-price">
+          <span class="price-currency" style="color:var(--gold-light)">$</span>
+          <span class="price-amount">199</span>
+          <span class="price-period">/session</span>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><div class="check-icon">✓</div>Full Style Consultation</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Two Premium Services</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Hair or Nail Treatment</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Luxury Refreshments</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>After-Care Product Kit</li>
+          <li class="pricing-feature"><div class="check-icon" style="background:rgba(201,169,110,0.1);color:rgba(255,255,255,0.4);">✗</div><span style="opacity:0.5">Private Suite</span></li>
+        </ul>
+        <a href="booking.html" class="btn btn-gold" style="width:100%;justify-content:center;">Book This Package</a>
+      </div>
+      <div class="pricing-card delay-3">
+        <div class="pricing-tier">Premium</div>
+        <div class="pricing-name">The Luxe Day</div>
+        <div class="pricing-desc">The ultimate all-day studio experience</div>
+        <div class="pricing-price">
+          <span class="price-currency">$</span>
+          <span class="price-amount">449</span>
+          <span class="price-period">/day</span>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><div class="check-icon">✓</div>Private Studio Suite</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>All Services Included</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Dedicated Specialist Team</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Gourmet Dining & Drinks</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Luxury Gift Set</li>
+          <li class="pricing-feature"><div class="check-icon">✓</div>Photo-Ready Studio Shoot</li>
+        </ul>
+        <a href="booking.html" class="btn btn-outline-gold" style="width:100%;justify-content:center;">Book This Package</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- A La Carte Pricing -->
+<section class="section bg-white">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <span class="section-label">À La Carte</span>
+      <h2 class="section-title">Individual <em>Service Pricing</em></h2>
+      <div class="divider-gold centered"></div>
+      <p class="section-subtitle">All prices are starting rates. Final pricing depends on hair length, density, and service complexity. A consultation is always complimentary.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-6);">
+
+      <div class="price-category reveal delay-1">
+        <div class="price-category-header">
+          <span class="price-cat-icon">💇‍♀️</span>
+          <h3>Hair Styling & Care</h3>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Service</th><th>Duration</th><th>Price</th></tr></thead>
+          <tbody>
+            <tr><td>Women's Haircut & Style</td><td>60 min</td><td>From $80</td></tr>
+            <tr><td>Men's Haircut</td><td>30 min</td><td>From $50</td></tr>
+            <tr><td>Blowout & Style</td><td>45 min</td><td>From $65</td></tr>
+            <tr><td>Keratin Treatment</td><td>2–3 hrs</td><td>From $220</td></tr>
+            <tr><td>Brazilian Blowout</td><td>2–3 hrs</td><td>From $250</td></tr>
+            <tr><td>Deep Conditioning</td><td>30 min</td><td>From $55</td></tr>
+            <tr><td>Hair Extensions (per row)</td><td>3–4 hrs</td><td>From $350</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="price-category reveal delay-2">
+        <div class="price-category-header">
+          <span class="price-cat-icon">🎨</span>
+          <h3>Hair Colouring</h3>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Service</th><th>Duration</th><th>Price</th></tr></thead>
+          <tbody>
+            <tr><td>Full Colour</td><td>2–3 hrs</td><td>From $150</td></tr>
+            <tr><td>Root Touch-Up</td><td>1.5 hrs</td><td>From $95</td></tr>
+            <tr><td>Highlights (Partial)</td><td>2 hrs</td><td>From $160</td></tr>
+            <tr><td>Highlights (Full)</td><td>2.5 hrs</td><td>From $220</td></tr>
+            <tr><td>Balayage / Ombré</td><td>2.5–3 hrs</td><td>From $250</td></tr>
+            <tr><td>Colour Correction</td><td>3–6 hrs</td><td>From $350</td></tr>
+            <tr><td>Toning / Gloss</td><td>45 min</td><td>From $65</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="price-category reveal delay-3">
+        <div class="price-category-header">
+          <span class="price-cat-icon">💅</span>
+          <h3>Nail Services</h3>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Service</th><th>Duration</th><th>Price</th></tr></thead>
+          <tbody>
+            <tr><td>Classic Manicure</td><td>45 min</td><td>From $45</td></tr>
+            <tr><td>Gel Manicure</td><td>60 min</td><td>From $65</td></tr>
+            <tr><td>Luxury Spa Pedicure</td><td>75 min</td><td>From $85</td></tr>
+            <tr><td>Gel Pedicure</td><td>75 min</td><td>From $95</td></tr>
+            <tr><td>Acrylic Full Set</td><td>90 min</td><td>From $110</td></tr>
+            <tr><td>Nail Art (per nail)</td><td>—</td><td>From $5/nail</td></tr>
+            <tr><td>Bridal Nails Package</td><td>3 hrs</td><td>From $280</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="price-category reveal delay-4">
+        <div class="price-category-header">
+          <span class="price-cat-icon">✨</span>
+          <h3>Beauty Treatments</h3>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Service</th><th>Duration</th><th>Price</th></tr></thead>
+          <tbody>
+            <tr><td>Brow Shape & Tint</td><td>45 min</td><td>From $55</td></tr>
+            <tr><td>Lash Lift & Tint</td><td>60 min</td><td>From $95</td></tr>
+            <tr><td>Classic Lash Extensions</td><td>90 min</td><td>From $180</td></tr>
+            <tr><td>Volume Lash Extensions</td><td>2.5 hrs</td><td>From $250</td></tr>
+            <tr><td>Luxury Facial</td><td>60 min</td><td>From $130</td></tr>
+            <tr><td>Full Face Wax</td><td>30 min</td><td>From $60</td></tr>
+            <tr><td>Skin Treatment (HydraFacial)</td><td>75 min</td><td>From $195</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="price-category reveal delay-5">
+        <div class="price-category-header">
+          <span class="price-cat-icon">💄</span>
+          <h3>Makeup Artistry</h3>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Service</th><th>Duration</th><th>Price</th></tr></thead>
+          <tbody>
+            <tr><td>Day / Occasion Makeup</td><td>60 min</td><td>From $120</td></tr>
+            <tr><td>Evening / Glam Makeup</td><td>75 min</td><td>From $160</td></tr>
+            <tr><td>Bridal Makeup (Day-of)</td><td>2 hrs</td><td>From $350</td></tr>
+            <tr><td>Bridal Trial</td><td>2 hrs</td><td>From $220</td></tr>
+            <tr><td>Bridesmaid Makeup</td><td>60 min</td><td>From $120/person</td></tr>
+            <tr><td>Airbrush Makeup Add-on</td><td>—</td><td>+$50</td></tr>
+            <tr><td>Makeup Lesson (1:1)</td><td>90 min</td><td>From $180</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="price-category reveal delay-6">
+        <div class="price-category-header">
+          <span class="price-cat-icon">👑</span>
+          <h3>Bridal Packages</h3>
+        </div>
+        <table class="price-table">
+          <thead><tr><th>Package</th><th>Includes</th><th>Price</th></tr></thead>
+          <tbody>
+            <tr><td>Bride Essentials</td><td>Hair + Makeup</td><td>From $480</td></tr>
+            <tr><td>Bride Luxe</td><td>Hair + Makeup + Nails</td><td>From $680</td></tr>
+            <tr><td>Full Bridal Party (4)</td><td>Hair + Makeup each</td><td>From $1,600</td></tr>
+            <tr><td>Full Bridal Party (6)</td><td>Hair + Makeup each</td><td>From $2,200</td></tr>
+            <tr><td>Bridal Day Buyout</td><td>Full studio + team</td><td>From $3,500</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div style="background:var(--gold-xlight);border:1px solid var(--border-strong);border-radius:var(--radius-xl);padding:var(--space-8);margin-top:var(--space-8);text-align:center;" class="reveal">
+      <p style="font-size:var(--fs-sm);color:var(--text-mid);">All prices are starting rates and may vary based on hair length, density, and service complexity. A complimentary consultation is included with every booking. Prices are in USD and exclude applicable taxes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section bg-cream">
+  <div class="container">
+    <div style="max-width:760px;margin:0 auto;">
+      <div class="section-header centered reveal">
+        <span class="section-label">Got Questions?</span>
+        <h2 class="section-title">Pricing <em>FAQs</em></h2>
+        <div class="divider-gold centered"></div>
+      </div>
+      <div class="reveal">
+        <div class="faq-item">
+          <div class="faq-question"><h5>Do you charge extra for consultations?</h5><span class="faq-toggle">+</span></div>
+          <div class="faq-answer"><p>Never. All consultations at Glamore are completely complimentary. We believe that understanding your vision is the foundation of any great result, and we always want to get that right before we begin.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><h5>Why do prices vary from the starting rate?</h5><span class="faq-toggle">+</span></div>
+          <div class="faq-answer"><p>Services like colour, extensions, and some treatments depend on factors like hair length, density, current condition, and the complexity of the look you want. We'll always give you a precise quote during your consultation before any work begins.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><h5>Is a deposit required to book?</h5><span class="faq-toggle">+</span></div>
+          <div class="faq-answer"><p>Yes, we require a 25% deposit to secure your appointment. This is applied to your final service total. For bridal packages and full-day bookings, a 50% deposit is required. Deposits are fully refundable with 48 hours notice.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><h5>Do you offer group or bridal party discounts?</h5><span class="faq-toggle">+</span></div>
+          <div class="faq-answer"><p>Absolutely. For bridal parties of 4 or more, we offer customised package pricing. Please contact us to discuss your specific group needs and we'll put together a bespoke quote.</p></div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question"><h5>What's included in the Studio Package price?</h5><span class="faq-toggle">+</span></div>
+          <div class="faq-answer"><p>The Luxe Day package includes exclusive use of a private studio suite, a dedicated team of specialists, all services from our menu, gourmet refreshments, a luxury gift set, and access to our photo-ready studio area.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-lg cta-section">
+  <div class="container" style="position:relative;z-index:1;">
+    <h2 class="reveal" style="color:var(--white);">Ready to <em>Invest</em> in You?</h2>
+    <p class="reveal" style="color:rgba(255,255,255,0.7);">Book your appointment and experience the Glamore difference first-hand.</p>
+    <div class="cta-actions reveal">
+      <a href="booking.html" class="btn btn-gold btn-lg">Book Appointment</a>
+      <a href="contact.html" class="btn btn-outline-white btn-lg">Ask a Question</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="display:inline-flex;"><span class="nav-logo-main">Glamore</span></a><p class="footer-desc">Where beauty becomes art.</p><div class="footer-socials"><a href="#" class="social-icon">📷</a><a href="#" class="social-icon">📘</a><a href="#" class="social-icon">📌</a><a href="#" class="social-icon">🎵</a></div></div>
+      <div class="footer-col"><h5>Quick Links</h5><ul class="footer-links"><li><a href="about.html" class="footer-link">→ About Us</a></li><li><a href="services.html" class="footer-link">→ Services</a></li><li><a href="gallery.html" class="footer-link">→ Gallery</a></li><li><a href="pricing.html" class="footer-link">→ Pricing</a></li><li><a href="team.html" class="footer-link">→ Our Team</a></li><li><a href="booking.html" class="footer-link">→ Book Now</a></li></ul></div>
+      <div class="footer-col"><h5>Services</h5><ul class="footer-links"><li><a href="services.html" class="footer-link">→ Hair Styling</a></li><li><a href="services.html" class="footer-link">→ Hair Colouring</a></li><li><a href="services.html" class="footer-link">→ Nail Services</a></li><li><a href="services.html" class="footer-link">→ Beauty Treatments</a></li><li><a href="services.html" class="footer-link">→ Makeup & Styling</a></li></ul></div>
+      <div class="footer-col"><h5>Visit Us</h5><div class="footer-contact-item"><span class="footer-contact-icon">📍</span><div class="footer-contact-text"><strong>Studio Location</strong><p>142 Glamour Lane, Suite 301<br>Beverly Hills, CA 90210</p></div></div><div class="footer-contact-item"><span class="footer-contact-icon">📞</span><div class="footer-contact-text"><strong>Call Us</strong><p>+1 (310) 555-GLAM</p></div></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Glamore Studio. All rights reserved.</p><p><a href="#">Privacy Policy</a></p></div>
+  </div>
+</footer>
+
+<button class="scroll-top" aria-label="Back to top">↑</button>
+<script src="assets/js/main.js"></script>
+<script>
+  document.querySelectorAll('.faq-question').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>

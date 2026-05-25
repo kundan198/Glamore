@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery — Glamore Premium Beauty Studio</title>
+  <meta name="description" content="Browse Glamore's beauty portfolio — stunning hair transformations, nail art masterpieces, bridal looks, and premium beauty results." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .gallery-page-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+    .gallery-page-item {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      transition: transform var(--duration-base) var(--ease-out);
+    }
+    .gallery-page-item:hover { transform: scale(1.02); }
+    .gallery-page-item.tall { grid-row: span 2; }
+    .gallery-page-item.wide { grid-column: span 2; }
+    .gpi-img {
+      width: 100%;
+      height: 260px;
+      display: block;
+    }
+    .gallery-page-item.tall .gpi-img { height: 100%; min-height: 540px; }
+    .gpi-img:nth-child(1) { background: linear-gradient(135deg,#C27B8C,#8B1A4A); }
+    .gallery-page-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top,rgba(61,26,58,0.92) 0%,transparent 55%);
+      opacity: 0;
+      transition: opacity var(--duration-base);
+      display: flex; flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--space-6);
+    }
+    .gallery-page-item:hover .gallery-page-overlay { opacity: 1; }
+    .gallery-page-overlay h5 { color: var(--white); font-size: var(--fs-base); margin-bottom: 3px; }
+    .gallery-page-overlay p  { color: var(--gold-light); font-size: var(--fs-xs); }
+    .gallery-page-overlay .view-btn {
+      margin-top: var(--space-3);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      font-size: var(--fs-xs);
+      color: var(--gold-light);
+      border: 1px solid rgba(201,169,110,0.4);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-full);
+      transition: all 0.2s;
+      width: fit-content;
+    }
+    .gallery-page-overlay .view-btn:hover {
+      background: var(--gold);
+      color: var(--white);
+      border-color: var(--gold);
+    }
+    @media(max-width:900px) {
+      .gallery-page-grid { grid-template-columns: repeat(2,1fr); }
+      .gallery-page-item.wide { grid-column: span 1; }
+      .gallery-page-item.tall { grid-row: span 1; }
+      .gallery-page-item.tall .gpi-img { min-height: 260px; }
+    }
+    @media(max-width:580px) {
+      .gallery-page-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-loader"><div class="loader-logo">Glamore</div></div>
+
+<nav class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-main">Glamore</span><span class="nav-logo-tagline">Premium Beauty Studio</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html"    class="nav-link">Home</a></li>
+      <li><a href="about.html"    class="nav-link">About</a></li>
+      <li><a href="services.html" class="nav-link">Services</a></li>
+      <li><a href="gallery.html"  class="nav-link active">Gallery</a></li>
+      <li><a href="pricing.html"  class="nav-link">Pricing</a></li>
+      <li><a href="team.html"     class="nav-link">Team</a></li>
+      <li><a href="contact.html"  class="nav-link">Contact</a></li>
+    </ul>
+    <div class="nav-cta"><a href="booking.html" class="btn btn-gold btn-sm">Book Now</a></div>
+    <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html" class="nav-link">Home</a><a href="about.html" class="nav-link">About</a><a href="services.html" class="nav-link">Services</a><a href="gallery.html" class="nav-link">Gallery</a><a href="pricing.html" class="nav-link">Pricing</a><a href="team.html" class="nav-link">Team</a><a href="contact.html" class="nav-link">Contact</a>
+  <a href="booking.html" class="btn btn-gold">Book Appointment</a>
+</div>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-label">Our Portfolio</div>
+    <h1>Beauty <em style="color:var(--gold);font-style:italic;">Gallery</em></h1>
+    <p>Real transformations by our team. Every look tells a story of artistry, skill, and the joy of feeling beautiful.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span><span class="current">Gallery</span></div>
+  </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="section bg-cream">
+  <div class="container">
+
+    <!-- Filters (Hick's Law — simple choices) -->
+    <div class="gallery-filters reveal">
+      <button class="filter-btn active" data-filter="all">All Work</button>
+      <button class="filter-btn" data-filter="hair">Hair Styling</button>
+      <button class="filter-btn" data-filter="colour">Hair Colour</button>
+      <button class="filter-btn" data-filter="nails">Nail Art</button>
+      <button class="filter-btn" data-filter="bridal">Bridal</button>
+      <button class="filter-btn" data-filter="makeup">Makeup</button>
+    </div>
+
+    <div class="gallery-page-grid reveal">
+
+      <!-- Row 1 -->
+      <div class="gallery-page-item tall" data-category="bridal">
+        <div class="gpi-img" style="background:linear-gradient(160deg,#F0D5DB 0%,#C27B8C 40%,#4A2040 100%);height:100%;min-height:540px;"></div>
+        <div class="gallery-page-overlay">
+          <h5>Bridal Full Glam</h5>
+          <p>Makeup &amp; Hair Styling</p>
+          <div class="view-btn">View ↗</div>
+        </div>
+      </div>
+      <div class="gallery-page-item" data-category="colour">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#EDD9AD 0%,#C9A96E 50%,#9E7A3F 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Golden Balayage</h5><p>Hair Colouring</p><div class="view-btn">View ↗</div></div>
+      </div>
+      <div class="gallery-page-item" data-category="nails">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#E8D5F0 0%,#A87AA8 50%,#3D1A3A 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Floral Nail Art</h5><p>Nail Art Design</p><div class="view-btn">View ↗</div></div>
+      </div>
+
+      <!-- Row 2 -->
+      <div class="gallery-page-item wide" data-category="hair">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#F0D5DB 0%,#C27B8C 50%,#6B3265 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Precision Cut &amp; Style</h5><p>Hair Styling</p><div class="view-btn">View ↗</div></div>
+      </div>
+      <div class="gallery-page-item" data-category="makeup">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#FBF3E2 0%,#C9A96E 50%,#9E7A3F 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Evening Glam Makeup</h5><p>Makeup Artistry</p><div class="view-btn">View ↗</div></div>
+      </div>
+
+      <!-- Row 3 -->
+      <div class="gallery-page-item" data-category="nails">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#C9A96E 0%,#C27B8C 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Rose Gold Nails</h5><p>Gel Manicure</p><div class="view-btn">View ↗</div></div>
+      </div>
+      <div class="gallery-page-item" data-category="colour">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#D5C0E8 0%,#6B3265 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Lavender Highlights</h5><p>Fashion Colour</p><div class="view-btn">View ↗</div></div>
+      </div>
+      <div class="gallery-page-item tall" data-category="bridal">
+        <div class="gpi-img" style="background:linear-gradient(160deg,#FDF0F3 0%,#F0D5DB 30%,#C27B8C 70%,#4A2040 100%);height:100%;min-height:540px;"></div>
+        <div class="gallery-page-overlay"><h5>Bridal Updo</h5><p>Bridal Hair &amp; Makeup</p><div class="view-btn">View ↗</div></div>
+      </div>
+
+      <!-- Row 4 -->
+      <div class="gallery-page-item" data-category="hair">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#FAF7F2 0%,#C9A96E 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Blowout &amp; Waves</h5><p>Hair Styling</p><div class="view-btn">View ↗</div></div>
+      </div>
+      <div class="gallery-page-item wide" data-category="nails">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#4A2040 0%,#C27B8C 50%,#EDD9AD 100%);"></div>
+        <div class="gallery-page-overlay"><h5>3D Nail Art Collection</h5><p>Nail Artistry</p><div class="view-btn">View ↗</div></div>
+      </div>
+
+      <!-- Row 5 -->
+      <div class="gallery-page-item wide" data-category="makeup">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#3D1A3A 0%,#6B3265 40%,#C27B8C 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Editorial Glam Look</h5><p>Makeup &amp; Styling</p><div class="view-btn">View ↗</div></div>
+      </div>
+      <div class="gallery-page-item" data-category="colour">
+        <div class="gpi-img" style="background:linear-gradient(135deg,#EDD9AD 0%,#C27B8C 100%);"></div>
+        <div class="gallery-page-overlay"><h5>Copper Ombré</h5><p>Hair Colouring</p><div class="view-btn">View ↗</div></div>
+      </div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:var(--space-12);">
+      <p style="color:var(--text-light);font-size:var(--fs-sm);margin-bottom:var(--space-4);">Follow us on Instagram for daily inspiration</p>
+      <a href="#" class="btn btn-outline-gold btn-lg">@glamore.studio ↗</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-lg cta-section">
+  <div class="container" style="position:relative;z-index:1;">
+    <h2 class="reveal" style="color:var(--white);">Love What You See? <em>Book It.</em></h2>
+    <p class="reveal" style="color:rgba(255,255,255,0.7);">Your transformation is one appointment away. Let our artists create something beautiful for you.</p>
+    <div class="cta-actions reveal">
+      <a href="booking.html" class="btn btn-gold btn-lg">Book Your Session</a>
+      <a href="services.html" class="btn btn-outline-white btn-lg">Explore Services</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="display:inline-flex;"><span class="nav-logo-main">Glamore</span></a><p class="footer-desc">Where beauty becomes art.</p><div class="footer-socials"><a href="#" class="social-icon">📷</a><a href="#" class="social-icon">📘</a><a href="#" class="social-icon">📌</a><a href="#" class="social-icon">🎵</a></div></div>
+      <div class="footer-col"><h5>Quick Links</h5><ul class="footer-links"><li><a href="about.html" class="footer-link">→ About Us</a></li><li><a href="services.html" class="footer-link">→ Services</a></li><li><a href="gallery.html" class="footer-link">→ Gallery</a></li><li><a href="pricing.html" class="footer-link">→ Pricing</a></li><li><a href="team.html" class="footer-link">→ Our Team</a></li><li><a href="booking.html" class="footer-link">→ Book Now</a></li></ul></div>
+      <div class="footer-col"><h5>Services</h5><ul class="footer-links"><li><a href="services.html" class="footer-link">→ Hair Styling</a></li><li><a href="services.html" class="footer-link">→ Hair Colouring</a></li><li><a href="services.html" class="footer-link">→ Nail Services</a></li><li><a href="services.html" class="footer-link">→ Beauty Treatments</a></li><li><a href="services.html" class="footer-link">→ Makeup & Styling</a></li><li><a href="services.html" class="footer-link">→ Studio Packages</a></li></ul></div>
+      <div class="footer-col"><h5>Visit Us</h5><div class="footer-contact-item"><span class="footer-contact-icon">📍</span><div class="footer-contact-text"><strong>Studio Location</strong><p>142 Glamour Lane, Suite 301<br>Beverly Hills, CA 90210</p></div></div><div class="footer-contact-item"><span class="footer-contact-icon">📞</span><div class="footer-contact-text"><strong>Call Us</strong><p>+1 (310) 555-GLAM</p></div></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Glamore Studio. All rights reserved.</p><p><a href="#">Privacy Policy</a></p></div>
+  </div>
+</footer>
+
+<button class="scroll-top" aria-label="Back to top">↑</button>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

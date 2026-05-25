@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Team — Glamore Premium Beauty Studio</title>
+  <meta name="description" content="Meet the specialist team behind Glamore — certified hair stylists, colourists, nail artists, makeup artists and beauty therapists." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .full-team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-8);
+    }
+    .full-team-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--duration-base) var(--ease-out);
+    }
+    .full-team-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+      border-color: var(--gold-light);
+    }
+    .full-team-photo {
+      aspect-ratio: 4/5;
+      position: relative;
+      overflow: hidden;
+    }
+    .full-team-photo-inner {
+      width: 100%; height: 100%;
+      transition: transform var(--duration-slow) var(--ease-out);
+    }
+    .full-team-card:hover .full-team-photo-inner {
+      transform: scale(1.05);
+    }
+    .full-team-badge {
+      position: absolute;
+      top: var(--space-4);
+      left: var(--space-4);
+      padding: var(--space-2) var(--space-4);
+      background: rgba(61,26,58,0.85);
+      backdrop-filter: blur(6px);
+      border-radius: var(--radius-full);
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.05em;
+    }
+    .full-team-info {
+      padding: var(--space-6) var(--space-7);
+    }
+    .full-team-info h3 {
+      font-size: var(--fs-xl);
+      margin-bottom: var(--space-1);
+    }
+    .full-team-role {
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: var(--space-4);
+      display: block;
+    }
+    .full-team-bio {
+      font-size: var(--fs-sm);
+      color: var(--text-mid);
+      line-height: 1.7;
+      margin-bottom: var(--space-5);
+    }
+    .full-team-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+    .skill-tag {
+      padding: var(--space-1) var(--space-3);
+      background: var(--gold-xlight);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-full);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--gold-dark);
+    }
+    .full-team-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--space-4);
+      border-top: 1px solid var(--border);
+    }
+    .full-team-socials {
+      display: flex;
+      gap: var(--space-2);
+    }
+    @media(max-width:900px) { .full-team-grid { grid-template-columns: repeat(2,1fr); } }
+    @media(max-width:580px) { .full-team-grid { grid-template-columns: 1fr; max-width:400px; margin:0 auto; } }
+  </style>
+</head>
+<body>
+
+<div class="page-loader"><div class="loader-logo">Glamore</div></div>
+
+<nav class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-main">Glamore</span><span class="nav-logo-tagline">Premium Beauty Studio</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html"    class="nav-link">Home</a></li>
+      <li><a href="about.html"    class="nav-link">About</a></li>
+      <li><a href="services.html" class="nav-link">Services</a></li>
+      <li><a href="gallery.html"  class="nav-link">Gallery</a></li>
+      <li><a href="pricing.html"  class="nav-link">Pricing</a></li>
+      <li><a href="team.html"     class="nav-link active">Team</a></li>
+      <li><a href="contact.html"  class="nav-link">Contact</a></li>
+    </ul>
+    <div class="nav-cta"><a href="booking.html" class="btn btn-gold btn-sm">Book Now</a></div>
+    <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html" class="nav-link">Home</a><a href="about.html" class="nav-link">About</a><a href="services.html" class="nav-link">Services</a><a href="gallery.html" class="nav-link">Gallery</a><a href="pricing.html" class="nav-link">Pricing</a><a href="team.html" class="nav-link">Team</a><a href="contact.html" class="nav-link">Contact</a>
+  <a href="booking.html" class="btn btn-gold">Book Appointment</a>
+</div>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-label">The Specialists</div>
+    <h1>Meet Our <em style="color:var(--gold);font-style:italic;">Artists</em></h1>
+    <p>A passionate team of certified beauty specialists dedicated to crafting extraordinary results for every client.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span><span class="current">Our Team</span></div>
+  </div>
+</section>
+
+<!-- Team Intro -->
+<section class="section-sm bg-cream">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-6);text-align:center;" class="reveal">
+      <div>
+        <div style="font-family:var(--font-display);font-size:var(--fs-3xl);font-weight:700;color:var(--gold);" data-count="15" data-suffix="+">0+</div>
+        <div style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.1em;color:var(--text-light);">Specialists</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:var(--fs-3xl);font-weight:700;color:var(--gold);" data-count="50" data-suffix="+">0+</div>
+        <div style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.1em;color:var(--text-light);">Certifications</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:var(--fs-3xl);font-weight:700;color:var(--gold);" data-count="12" data-suffix="">0</div>
+        <div style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.1em;color:var(--text-light);">Industry Awards</div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:var(--fs-3xl);font-weight:700;color:var(--gold);" data-count="8" data-suffix="">0</div>
+        <div style="font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:0.1em;color:var(--text-light);">Years Together</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Team Grid -->
+<section class="section bg-white">
+  <div class="container">
+    <div class="section-header centered reveal">
+      <span class="section-label">The Glamore Team</span>
+      <h2 class="section-title">Beauty <em>Experts</em></h2>
+      <div class="divider-gold centered"></div>
+    </div>
+
+    <div class="full-team-grid">
+
+      <div class="full-team-card reveal delay-1">
+        <div class="full-team-photo">
+          <div class="full-team-photo-inner" style="background:linear-gradient(160deg,#F0D5DB 0%,#A87AA8 50%,#3D1A3A 100%);"></div>
+          <div class="full-team-badge">Lead Stylist</div>
+        </div>
+        <div class="full-team-info">
+          <h3>Aria Fontaine</h3>
+          <span class="full-team-role">Founder & Lead Hair Stylist</span>
+          <p class="full-team-bio">With 12 years of experience and training from the Sassoon Academy in London, Aria's precision cuts and creative vision are the cornerstone of Glamore. She specialises in transformative haircuts and seamless balayage.</p>
+          <div class="full-team-skills">
+            <span class="skill-tag">Precision Cuts</span>
+            <span class="skill-tag">Balayage</span>
+            <span class="skill-tag">Bridal Hair</span>
+            <span class="skill-tag">Extensions</span>
+          </div>
+          <div class="full-team-footer">
+            <div class="full-team-socials">
+              <a href="#" class="team-social-btn">📷</a>
+              <a href="#" class="team-social-btn">🔗</a>
+            </div>
+            <a href="booking.html" class="btn btn-gold btn-sm">Book with Aria</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="full-team-card reveal delay-2">
+        <div class="full-team-photo">
+          <div class="full-team-photo-inner" style="background:linear-gradient(160deg,#EDD9AD 0%,#C9A96E 50%,#9E7A3F 100%);"></div>
+          <div class="full-team-badge">Master Colourist</div>
+        </div>
+        <div class="full-team-info">
+          <h3>Luna Marchetti</h3>
+          <span class="full-team-role">Master Colourist</span>
+          <p class="full-team-bio">Luna trained under award-winning colourists in Milan and New York. Her eye for tone and depth creates breathtaking colour results that complement each individual's complexion and lifestyle beautifully.</p>
+          <div class="full-team-skills">
+            <span class="skill-tag">Balayage</span>
+            <span class="skill-tag">Fashion Colour</span>
+            <span class="skill-tag">Colour Correction</span>
+            <span class="skill-tag">Highlights</span>
+          </div>
+          <div class="full-team-footer">
+            <div class="full-team-socials"><a href="#" class="team-social-btn">📷</a><a href="#" class="team-social-btn">🔗</a></div>
+            <a href="booking.html" class="btn btn-gold btn-sm">Book with Luna</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="full-team-card reveal delay-3">
+        <div class="full-team-photo">
+          <div class="full-team-photo-inner" style="background:linear-gradient(160deg,#E8D5F0 0%,#A87AA8 50%,#3D1A3A 100%);"></div>
+          <div class="full-team-badge">Nail Artist</div>
+        </div>
+        <div class="full-team-info">
+          <h3>Zoe Nakamura</h3>
+          <span class="full-team-role">Senior Nail Art Specialist</span>
+          <p class="full-team-bio">Zoe is a certified nail artist whose intricate designs have been featured in Vogue and Harper's Bazaar. From minimalist elegance to elaborate 3D nail art, her work consistently stops people in their tracks.</p>
+          <div class="full-team-skills">
+            <span class="skill-tag">3D Nail Art</span>
+            <span class="skill-tag">Gel & Acrylic</span>
+            <span class="skill-tag">Bridal Nails</span>
+            <span class="skill-tag">Nail Sculpting</span>
+          </div>
+          <div class="full-team-footer">
+            <div class="full-team-socials"><a href="#" class="team-social-btn">📷</a><a href="#" class="team-social-btn">🔗</a></div>
+            <a href="booking.html" class="btn btn-gold btn-sm">Book with Zoe</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="full-team-card reveal delay-4">
+        <div class="full-team-photo">
+          <div class="full-team-photo-inner" style="background:linear-gradient(160deg,#FDF0F3 0%,#F0D5DB 40%,#C27B8C 100%);"></div>
+          <div class="full-team-badge">Makeup Artist</div>
+        </div>
+        <div class="full-team-info">
+          <h3>Celeste Rivera</h3>
+          <span class="full-team-role">Lead Makeup Artist & Bridal Stylist</span>
+          <p class="full-team-bio">Award-winning makeup artist Celeste brings a Hollywood sensibility to every look. She has worked on editorial shoots, fashion weeks, and over 500 weddings, and her bridal work is simply unrivalled.</p>
+          <div class="full-team-skills">
+            <span class="skill-tag">Bridal Makeup</span>
+            <span class="skill-tag">Airbrush</span>
+            <span class="skill-tag">Editorial</span>
+            <span class="skill-tag">Makeup Lessons</span>
+          </div>
+          <div class="full-team-footer">
+            <div class="full-team-socials"><a href="#" class="team-social-btn">📷</a><a href="#" class="team-social-btn">🔗</a></div>
+            <a href="booking.html" class="btn btn-gold btn-sm">Book with Celeste</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="full-team-card reveal delay-5">
+        <div class="full-team-photo">
+          <div class="full-team-photo-inner" style="background:linear-gradient(160deg,#FBF3E2 0%,#EDD9AD 50%,#C9A96E 100%);"></div>
+          <div class="full-team-badge">Beauty Therapist</div>
+        </div>
+        <div class="full-team-info">
+          <h3>Maya Okafor</h3>
+          <span class="full-team-role">Senior Beauty Therapist</span>
+          <p class="full-team-bio">Maya is a certified aesthetician with specialist training in lash extensions, brow design, and advanced skin treatments. Her gentle, methodical approach puts even the most nervous clients completely at ease.</p>
+          <div class="full-team-skills">
+            <span class="skill-tag">Lash Extensions</span>
+            <span class="skill-tag">Brow Design</span>
+            <span class="skill-tag">Facials</span>
+            <span class="skill-tag">Skin Treatments</span>
+          </div>
+          <div class="full-team-footer">
+            <div class="full-team-socials"><a href="#" class="team-social-btn">📷</a><a href="#" class="team-social-btn">🔗</a></div>
+            <a href="booking.html" class="btn btn-gold btn-sm">Book with Maya</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="full-team-card reveal delay-6">
+        <div class="full-team-photo">
+          <div class="full-team-photo-inner" style="background:linear-gradient(160deg,#D5C0E8 0%,#A87AA8 50%,#6B3265 100%);"></div>
+          <div class="full-team-badge">Hair Stylist</div>
+        </div>
+        <div class="full-team-info">
+          <h3>Sofia Laurent</h3>
+          <span class="full-team-role">Hair Stylist & Texture Specialist</span>
+          <p class="full-team-bio">Sofia specialises in working with all hair textures — from fine and straight to coily and curly. Her expertise in texture-specific cutting and styling techniques delivers transformative results for clients often underserved by traditional salons.</p>
+          <div class="full-team-skills">
+            <span class="skill-tag">Curly Cuts</span>
+            <span class="skill-tag">Texture</span>
+            <span class="skill-tag">Blowouts</span>
+            <span class="skill-tag">Natural Hair</span>
+          </div>
+          <div class="full-team-footer">
+            <div class="full-team-socials"><a href="#" class="team-social-btn">📷</a><a href="#" class="team-social-btn">🔗</a></div>
+            <a href="booking.html" class="btn btn-gold btn-sm">Book with Sofia</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Join Our Team -->
+<section class="section bg-cream">
+  <div class="container">
+    <div style="background:linear-gradient(135deg,var(--plum) 0%,var(--plum-mid) 100%);border-radius:var(--radius-xl);padding:var(--space-16);display:grid;grid-template-columns:1fr 1fr;gap:var(--space-12);align-items:center;" class="reveal">
+      <div>
+        <span class="section-label" style="color:var(--gold-light);">Careers</span>
+        <h2 style="color:var(--white);font-size:var(--fs-3xl);margin-bottom:var(--space-5);">Join the <em style="color:var(--gold);font-style:italic;">Glamore</em> Family</h2>
+        <p style="color:rgba(255,255,255,0.65);margin-bottom:var(--space-6);">We're always looking for passionate, talented beauty specialists to join our team. If you share our commitment to excellence and love for the craft, we'd love to hear from you.</p>
+        <a href="contact.html" class="btn btn-gold">Apply Now</a>
+      </div>
+      <div>
+        <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+          <div style="display:flex;align-items:center;gap:var(--space-4);background:rgba(255,255,255,0.06);padding:var(--space-5) var(--space-6);border-radius:var(--radius-lg);border:1px solid rgba(201,169,110,0.15);">
+            <div style="font-size:1.5rem;">🌟</div>
+            <div><div style="color:var(--white);font-weight:600;font-size:var(--fs-sm);">Competitive Compensation</div><div style="color:rgba(255,255,255,0.5);font-size:var(--fs-xs);">Industry-leading pay plus commission</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--space-4);background:rgba(255,255,255,0.06);padding:var(--space-5) var(--space-6);border-radius:var(--radius-lg);border:1px solid rgba(201,169,110,0.15);">
+            <div style="font-size:1.5rem;">🎓</div>
+            <div><div style="color:var(--white);font-weight:600;font-size:var(--fs-sm);">Continuous Education</div><div style="color:rgba(255,255,255,0.5);font-size:var(--fs-xs);">Annual training & development budget</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--space-4);background:rgba(255,255,255,0.06);padding:var(--space-5) var(--space-6);border-radius:var(--radius-lg);border:1px solid rgba(201,169,110,0.15);">
+            <div style="font-size:1.5rem;">❤️</div>
+            <div><div style="color:var(--white);font-weight:600;font-size:var(--fs-sm);">Supportive Culture</div><div style="color:rgba(255,255,255,0.5);font-size:var(--fs-xs);">A team that celebrates each other</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-lg cta-section">
+  <div class="container" style="position:relative;z-index:1;">
+    <h2 class="reveal" style="color:var(--white);">Book with Your <em>Favourite Specialist</em></h2>
+    <p class="reveal" style="color:rgba(255,255,255,0.7);">Every member of our team is available for personalised appointments. Choose your specialist and book directly.</p>
+    <div class="cta-actions reveal">
+      <a href="booking.html" class="btn btn-gold btn-lg">Book Appointment</a>
+      <a href="services.html" class="btn btn-outline-white btn-lg">View Services</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="display:inline-flex;"><span class="nav-logo-main">Glamore</span></a><p class="footer-desc">Where beauty becomes art.</p><div class="footer-socials"><a href="#" class="social-icon">📷</a><a href="#" class="social-icon">📘</a><a href="#" class="social-icon">📌</a><a href="#" class="social-icon">🎵</a></div></div>
+      <div class="footer-col"><h5>Quick Links</h5><ul class="footer-links"><li><a href="about.html" class="footer-link">→ About Us</a></li><li><a href="services.html" class="footer-link">→ Services</a></li><li><a href="gallery.html" class="footer-link">→ Gallery</a></li><li><a href="pricing.html" class="footer-link">→ Pricing</a></li><li><a href="team.html" class="footer-link">→ Our Team</a></li><li><a href="booking.html" class="footer-link">→ Book Now</a></li></ul></div>
+      <div class="footer-col"><h5>Services</h5><ul class="footer-links"><li><a href="services.html" class="footer-link">→ Hair Styling</a></li><li><a href="services.html" class="footer-link">→ Hair Colouring</a></li><li><a href="services.html" class="footer-link">→ Nail Services</a></li><li><a href="services.html" class="footer-link">→ Beauty Treatments</a></li><li><a href="services.html" class="footer-link">→ Makeup & Styling</a></li></ul></div>
+      <div class="footer-col"><h5>Visit Us</h5><div class="footer-contact-item"><span class="footer-contact-icon">📍</span><div class="footer-contact-text"><strong>Studio Location</strong><p>142 Glamour Lane, Suite 301<br>Beverly Hills, CA 90210</p></div></div><div class="footer-contact-item"><span class="footer-contact-icon">📞</span><div class="footer-contact-text"><strong>Call Us</strong><p>+1 (310) 555-GLAM</p></div></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Glamore Studio. All rights reserved.</p><p><a href="#">Privacy Policy</a></p></div>
+  </div>
+</footer>
+
+<button class="scroll-top" aria-label="Back to top">↑</button>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

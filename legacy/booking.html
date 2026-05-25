@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Appointment — Glamore Premium Beauty Studio</title>
+  <meta name="description" content="Book your appointment at Glamore — choose your service, specialist, and preferred date for your premium beauty experience." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Lato:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: var(--space-10);
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      width: 100%;
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .step-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--cream-dark);
+      border: 2px solid var(--border-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fs-sm);
+      font-weight: 700;
+      color: var(--text-light);
+      margin-bottom: var(--space-2);
+      position: relative;
+      z-index: 1;
+      transition: all var(--duration-base);
+    }
+    .step.active .step-num {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--white);
+    }
+    .step.done .step-num {
+      background: var(--plum);
+      border-color: var(--plum);
+      color: var(--white);
+    }
+    .step-label {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      color: var(--text-light);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: center;
+    }
+    .step.active .step-label { color: var(--gold); }
+    .step.done .step-label   { color: var(--plum); }
+
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-3);
+    }
+    .time-slot {
+      padding: var(--space-3) var(--space-4);
+      border: 1.5px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text-mid);
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      background: var(--white);
+    }
+    .time-slot:hover { border-color: var(--gold); color: var(--gold); }
+    .time-slot.selected { background: var(--gold); color: var(--white); border-color: var(--gold); }
+    .time-slot.unavailable { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+    .time-slot.unavailable:hover { border-color: var(--border-strong); color: var(--text-mid); }
+
+    .service-option {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      padding: var(--space-4) var(--space-5);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      background: var(--white);
+    }
+    .service-option:hover { border-color: var(--gold-light); background: var(--gold-xlight); }
+    .service-option input[type="radio"] { display: none; }
+    .service-option:has(input:checked) { border-color: var(--gold); background: var(--gold-xlight); }
+    .service-option-icon { font-size: 1.5rem; width: 44px; text-align: center; }
+    .service-option-label h6 { font-size: var(--fs-sm); color: var(--text-dark); margin-bottom: 2px; }
+    .service-option-label p  { font-size: var(--fs-xs); color: var(--text-light); }
+    .radio-custom {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border-strong);
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--duration-fast);
+    }
+    .service-option:has(input:checked) .radio-custom {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+    .radio-custom::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--white);
+      display: none;
+    }
+    .service-option:has(input:checked) .radio-custom::after { display: block; }
+
+    #service-duration {
+      display: none;
+      margin-top: var(--space-3);
+      padding: var(--space-3) var(--space-5);
+      background: var(--gold-xlight);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      font-size: var(--fs-sm);
+      color: var(--gold-dark);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-loader"><div class="loader-logo">Glamore</div></div>
+
+<nav class="nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><span class="nav-logo-main">Glamore</span><span class="nav-logo-tagline">Premium Beauty Studio</span></a>
+    <ul class="nav-links">
+      <li><a href="index.html"    class="nav-link">Home</a></li>
+      <li><a href="about.html"    class="nav-link">About</a></li>
+      <li><a href="services.html" class="nav-link">Services</a></li>
+      <li><a href="gallery.html"  class="nav-link">Gallery</a></li>
+      <li><a href="pricing.html"  class="nav-link">Pricing</a></li>
+      <li><a href="team.html"     class="nav-link">Team</a></li>
+      <li><a href="contact.html"  class="nav-link">Contact</a></li>
+    </ul>
+    <div class="nav-cta"><a href="booking.html" class="btn btn-gold btn-sm active-btn">Book Now</a></div>
+    <button class="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html" class="nav-link">Home</a><a href="about.html" class="nav-link">About</a><a href="services.html" class="nav-link">Services</a><a href="gallery.html" class="nav-link">Gallery</a><a href="pricing.html" class="nav-link">Pricing</a><a href="team.html" class="nav-link">Team</a><a href="contact.html" class="nav-link">Contact</a>
+  <a href="booking.html" class="btn btn-gold">Book Appointment</a>
+</div>
+
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero-label">Book Your Session</div>
+    <h1>Make an <em style="color:var(--gold);font-style:italic;">Appointment</em></h1>
+    <p>Select your service, preferred specialist, and the time that works for you. We'll confirm within 24 hours.</p>
+    <div class="breadcrumb"><a href="index.html">Home</a><span>›</span><span class="current">Book Appointment</span></div>
+  </div>
+</section>
+
+<!-- Booking Section -->
+<section class="section bg-cream">
+  <div class="container">
+    <div class="booking-layout">
+
+      <!-- Booking Form -->
+      <div class="reveal">
+        <div class="booking-card">
+          <!-- Step Indicator (Miller's Law — chunked into 3 steps) -->
+          <div class="step-indicator">
+            <div class="step active">
+              <div class="step-num">1</div>
+              <div class="step-label">Service</div>
+            </div>
+            <div class="step">
+              <div class="step-num">2</div>
+              <div class="step-label">Schedule</div>
+            </div>
+            <div class="step">
+              <div class="step-num">3</div>
+              <div class="step-label">Details</div>
+            </div>
+          </div>
+
+          <form id="booking-form">
+            <!-- Service Selection -->
+            <div style="margin-bottom:var(--space-8);">
+              <h4 style="margin-bottom:var(--space-6);">Choose Your Service</h4>
+              <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+                <label class="service-option">
+                  <input type="radio" name="service-type" value="hair-styling" id="service" />
+                  <span class="service-option-icon">💇‍♀️</span>
+                  <div class="service-option-label">
+                    <h6>Hair Styling & Care</h6>
+                    <p>Cuts, blowouts, treatments · From $80</p>
+                  </div>
+                  <div class="radio-custom"></div>
+                </label>
+                <label class="service-option">
+                  <input type="radio" name="service-type" value="hair-color" />
+                  <span class="service-option-icon">🎨</span>
+                  <div class="service-option-label">
+                    <h6>Hair Colouring & Treatments</h6>
+                    <p>Balayage, colour, highlights · From $150</p>
+                  </div>
+                  <div class="radio-custom"></div>
+                </label>
+                <label class="service-option">
+                  <input type="radio" name="service-type" value="nail-services" />
+                  <span class="service-option-icon">💅</span>
+                  <div class="service-option-label">
+                    <h6>Nail Services & Art</h6>
+                    <p>Manicure, pedicure, nail art · From $45</p>
+                  </div>
+                  <div class="radio-custom"></div>
+                </label>
+                <label class="service-option">
+                  <input type="radio" name="service-type" value="beauty-glam" />
+                  <span class="service-option-icon">✨</span>
+                  <div class="service-option-label">
+                    <h6>Beauty & Glam Treatments</h6>
+                    <p>Lashes, brows, facials · From $95</p>
+                  </div>
+                  <div class="radio-custom"></div>
+                </label>
+                <label class="service-option">
+                  <input type="radio" name="service-type" value="makeup" />
+                  <span class="service-option-icon">💄</span>
+                  <div class="service-option-label">
+                    <h6>Makeup & Event Styling</h6>
+                    <p>Occasion, editorial, bridal · From $120</p>
+                  </div>
+                  <div class="radio-custom"></div>
+                </label>
+                <label class="service-option">
+                  <input type="radio" name="service-type" value="bridal" />
+                  <span class="service-option-icon">👑</span>
+                  <div class="service-option-label">
+                    <h6>Bridal / Studio Package</h6>
+                    <p>Full day experience · From $350</p>
+                  </div>
+                  <div class="radio-custom"></div>
+                </label>
+              </div>
+              <div id="service-duration"></div>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border);margin:var(--space-8) 0;" />
+
+            <!-- Specialist -->
+            <div class="form-group">
+              <label class="form-label" for="specialist">Preferred Specialist</label>
+              <select class="form-select" id="specialist" name="specialist">
+                <option value="">Any available specialist</option>
+                <option value="aria">Aria Fontaine — Lead Hair Stylist</option>
+                <option value="luna">Luna Marchetti — Master Colourist</option>
+                <option value="zoe">Zoe Nakamura — Nail Art Specialist</option>
+                <option value="celeste">Celeste Rivera — Makeup Artist</option>
+                <option value="maya">Maya Okafor — Beauty Therapist</option>
+                <option value="sofia">Sofia Laurent — Hair & Texture Specialist</option>
+              </select>
+            </div>
+
+            <!-- Date & Time -->
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="date">Preferred Date <span class="required">*</span></label>
+                <input type="date" class="form-input" id="date" name="date" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Preferred Time <span class="required">*</span></label>
+                <div class="time-grid">
+                  <button type="button" class="time-slot" onclick="selectTime(this)">9:00 am</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">10:00 am</button>
+                  <button type="button" class="time-slot unavailable">11:00 am</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">12:00 pm</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">1:00 pm</button>
+                  <button type="button" class="time-slot unavailable">2:00 pm</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">3:00 pm</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">4:00 pm</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">5:00 pm</button>
+                  <button type="button" class="time-slot unavailable">6:00 pm</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">7:00 pm</button>
+                  <button type="button" class="time-slot" onclick="selectTime(this)">8:00 pm</button>
+                </div>
+                <input type="hidden" name="time" id="selected-time" />
+              </div>
+            </div>
+
+            <hr style="border:none;border-top:1px solid var(--border);margin:var(--space-8) 0;" />
+
+            <!-- Personal Details -->
+            <h4 style="margin-bottom:var(--space-6);">Your Details</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="first-name">First Name <span class="required">*</span></label>
+                <input type="text" class="form-input" id="first-name" name="first-name" placeholder="Jane" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="last-name">Last Name <span class="required">*</span></label>
+                <input type="text" class="form-input" id="last-name" name="last-name" placeholder="Smith" required />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="email">Email Address <span class="required">*</span></label>
+                <input type="email" class="form-input" id="email" name="email" placeholder="jane@email.com" required />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" class="form-input" id="phone" name="phone" placeholder="+1 (555) 000-0000" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="notes">Special Requests or Notes</label>
+              <textarea class="form-textarea" id="notes" name="notes" placeholder="Tell us about any allergies, special requests, or vision you have for your look…" style="min-height:100px;"></textarea>
+            </div>
+
+            <div style="display:flex;gap:var(--space-4);align-items:center;margin-top:var(--space-6);">
+              <button type="submit" class="btn btn-gold btn-lg" style="flex:1;justify-content:center;">
+                Request Appointment ✨
+              </button>
+            </div>
+            <p style="font-size:var(--fs-xs);color:var(--text-light);margin-top:var(--space-4);text-align:center;">A 25% deposit is required to confirm your booking. We'll contact you within 24 hours to complete your reservation.</p>
+          </form>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="booking-sidebar reveal delay-2">
+
+        <div class="sidebar-card dark">
+          <h4 style="margin-bottom:var(--space-4);">Studio Hours</h4>
+          <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+            <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:var(--space-3);">
+              <span style="color:rgba(255,255,255,0.7);">Monday–Friday</span>
+              <span style="color:var(--gold-light);font-weight:600;">9am – 8pm</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:var(--space-3);">
+              <span style="color:rgba(255,255,255,0.7);">Saturday</span>
+              <span style="color:var(--gold-light);font-weight:600;">9am – 8pm</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:var(--fs-sm);">
+              <span style="color:rgba(255,255,255,0.7);">Sunday</span>
+              <span style="color:var(--gold-light);font-weight:600;">10am – 6pm</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <h4 style="margin-bottom:var(--space-4);">Studio Location</h4>
+          <div class="map-placeholder" style="height:180px;margin-bottom:var(--space-4);">
+            <p style="font-size:var(--fs-sm);color:var(--text-light);margin-top:var(--space-2);">142 Glamour Lane, Suite 301</p>
+          </div>
+          <p style="font-size:var(--fs-sm);color:var(--text-mid);">Beverly Hills, CA 90210</p>
+          <a href="contact.html" style="display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--fs-sm);font-weight:600;color:var(--gold);margin-top:var(--space-3);">Get Directions →</a>
+        </div>
+
+        <div class="sidebar-card">
+          <h4 style="margin-bottom:var(--space-4);">Why Book with Us?</h4>
+          <div style="display:flex;flex-direction:column;gap:var(--space-4);">
+            <div style="display:flex;gap:var(--space-3);align-items:flex-start;">
+              <span style="font-size:1.2rem;margin-top:2px;">✅</span>
+              <div><strong style="font-size:var(--fs-sm);">Free Consultation</strong><p style="font-size:var(--fs-xs);">Every service starts with a complimentary consultation.</p></div>
+            </div>
+            <div style="display:flex;gap:var(--space-3);align-items:flex-start;">
+              <span style="font-size:1.2rem;margin-top:2px;">💎</span>
+              <div><strong style="font-size:var(--fs-sm);">Premium Products</strong><p style="font-size:var(--fs-xs);">We use only luxury, cruelty-free products.</p></div>
+            </div>
+            <div style="display:flex;gap:var(--space-3);align-items:flex-start;">
+              <span style="font-size:1.2rem;margin-top:2px;">🔒</span>
+              <div><strong style="font-size:var(--fs-sm);">Flexible Booking</strong><p style="font-size:var(--fs-xs);">Cancel or reschedule with 48 hours notice — no charge.</p></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--gold-xlight);border:1px solid var(--border-strong);border-radius:var(--radius-xl);padding:var(--space-6);text-align:center;">
+          <p style="font-size:var(--fs-sm);color:var(--text-mid);margin-bottom:var(--space-3);">Prefer to call us directly?</p>
+          <a href="tel:+13105554526" style="font-family:var(--font-display);font-size:var(--fs-xl);color:var(--gold-dark);font-weight:700;">+1 (310) 555-GLAM</a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><a href="index.html" class="nav-logo" style="display:inline-flex;"><span class="nav-logo-main">Glamore</span></a><p class="footer-desc">Where beauty becomes art.</p><div class="footer-socials"><a href="#" class="social-icon">📷</a><a href="#" class="social-icon">📘</a><a href="#" class="social-icon">📌</a><a href="#" class="social-icon">🎵</a></div></div>
+      <div class="footer-col"><h5>Quick Links</h5><ul class="footer-links"><li><a href="about.html" class="footer-link">→ About Us</a></li><li><a href="services.html" class="footer-link">→ Services</a></li><li><a href="gallery.html" class="footer-link">→ Gallery</a></li><li><a href="pricing.html" class="footer-link">→ Pricing</a></li><li><a href="team.html" class="footer-link">→ Our Team</a></li></ul></div>
+      <div class="footer-col"><h5>Services</h5><ul class="footer-links"><li><a href="services.html" class="footer-link">→ Hair Styling</a></li><li><a href="services.html" class="footer-link">→ Hair Colouring</a></li><li><a href="services.html" class="footer-link">→ Nail Services</a></li><li><a href="services.html" class="footer-link">→ Beauty Treatments</a></li><li><a href="services.html" class="footer-link">→ Makeup & Styling</a></li></ul></div>
+      <div class="footer-col"><h5>Visit Us</h5><div class="footer-contact-item"><span class="footer-contact-icon">📍</span><div class="footer-contact-text"><strong>Studio Location</strong><p>142 Glamour Lane, Suite 301<br>Beverly Hills, CA 90210</p></div></div><div class="footer-contact-item"><span class="footer-contact-icon">📞</span><div class="footer-contact-text"><strong>Call Us</strong><p>+1 (310) 555-GLAM</p></div></div></div>
+    </div>
+    <div class="footer-bottom"><p>&copy; 2026 Glamore Studio. All rights reserved.</p><p><a href="#">Privacy Policy</a></p></div>
+  </div>
+</footer>
+
+<button class="scroll-top" aria-label="Back to top">↑</button>
+<script src="assets/js/main.js"></script>
+<script>
+function selectTime(btn) {
+  document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('selected-time').value = btn.textContent;
+}
+
+// Wire up the service radio buttons to the hidden select for the JS hint
+document.querySelectorAll('.service-option input[type="radio"]').forEach(input => {
+  input.addEventListener('change', () => {
+    const fakeSelect = document.getElementById('service');
+    if (fakeSelect) fakeSelect.value = input.value;
+    fakeSelect?.dispatchEvent(new Event('change'));
+  });
+});
+</script>
+</body>
+</html>
