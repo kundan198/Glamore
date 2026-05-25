@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -123,6 +123,7 @@ export default function Services() {
   const [active, setActive] = useState('hair-styling')
   const cat = categories.find(c => c.id === active)
   const tabsRef = useRef(null)
+  const tabsWrapRef = useRef(null)
   const contentRef = useRef(null)
 
   useGSAP(() => {
@@ -136,16 +137,11 @@ export default function Services() {
     )
   }, [])
 
-  const focusSelectedTab = (id) => {
-    const tab = tabsRef.current?.querySelector(`[data-srv-tab="${id}"]`)
-    tab?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
-  }
-
   const scrollToServices = () => {
     if (!contentRef.current) return
     const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 72
-    const tabsH = tabsRef.current?.closest('.srv-tabs-wrap')?.offsetHeight || 0
-    const target = contentRef.current.getBoundingClientRect().top + window.scrollY - navH - tabsH - 14
+    const tabsH = tabsWrapRef.current?.offsetHeight || 0
+    const target = contentRef.current.getBoundingClientRect().top + window.scrollY - navH - tabsH + 1
 
     window.scrollTo({
       top: Math.max(target, 0),
@@ -153,13 +149,12 @@ export default function Services() {
     })
   }
 
-  useEffect(() => {
-    focusSelectedTab(active)
-  }, [active])
-
   const handleTabChange = (id) => {
-    focusSelectedTab(id)
-    if (id === active) return
+    if (id === active) {
+      scrollToServices()
+      return
+    }
+
     gsap.to(contentRef.current, {
       opacity: 0, y: 18, duration: 0.24, ease: 'power2.inOut',
       onComplete: () => {
@@ -192,7 +187,7 @@ export default function Services() {
       </section>
 
       {/* Category tabs */}
-      <div className="srv-tabs-wrap" style={{ background: 'var(--near-black)', borderBottom: '1px solid var(--border)' }}>
+      <div ref={tabsWrapRef} className="srv-tabs-wrap" style={{ background: 'var(--near-black)', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
           <div ref={tabsRef} className="srv-tabs">
             {categories.map(c => (
