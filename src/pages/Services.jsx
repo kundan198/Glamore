@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
@@ -122,6 +122,7 @@ function ServiceCard({ service, accent }) {
 export default function Services() {
   const [active, setActive] = useState('hair-styling')
   const cat = categories.find(c => c.id === active)
+  const tabsRef = useRef(null)
   const contentRef = useRef(null)
 
   useGSAP(() => {
@@ -135,15 +136,38 @@ export default function Services() {
     )
   }, [])
 
+  const focusSelectedTab = (id) => {
+    const tab = tabsRef.current?.querySelector(`[data-srv-tab="${id}"]`)
+    tab?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+  }
+
+  const scrollToServices = () => {
+    if (!contentRef.current) return
+    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 72
+    const tabsH = tabsRef.current?.closest('.srv-tabs-wrap')?.offsetHeight || 0
+    const target = contentRef.current.getBoundingClientRect().top + window.scrollY - navH - tabsH - 14
+
+    window.scrollTo({
+      top: Math.max(target, 0),
+      behavior: 'smooth',
+    })
+  }
+
+  useEffect(() => {
+    focusSelectedTab(active)
+  }, [active])
+
   const handleTabChange = (id) => {
+    focusSelectedTab(id)
     if (id === active) return
     gsap.to(contentRef.current, {
-      opacity: 0, y: 20, duration: 0.25, ease: 'power2.in',
+      opacity: 0, y: 18, duration: 0.24, ease: 'power2.inOut',
       onComplete: () => {
         setActive(id)
+        requestAnimationFrame(scrollToServices)
         gsap.fromTo(contentRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.4, ease: 'power3.out' }
+          { opacity: 0, y: 18 },
+          { opacity: 1, y: 0, duration: 0.46, ease: 'power3.out' }
         )
       }
     })
@@ -170,10 +194,11 @@ export default function Services() {
       {/* Category tabs */}
       <div className="srv-tabs-wrap" style={{ background: 'var(--near-black)', borderBottom: '1px solid var(--border)' }}>
         <div className="container">
-          <div className="srv-tabs">
+          <div ref={tabsRef} className="srv-tabs">
             {categories.map(c => (
               <button
                 key={c.id}
+                data-srv-tab={c.id}
                 className={`srv-tab${active === c.id ? ' active' : ''}`}
                 onClick={() => handleTabChange(c.id)}
                 style={{ '--tab-accent': c.accent }}
