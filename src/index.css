@@ -1058,24 +1058,30 @@ body::before {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 3px;
-  background: rgba(255,255,255,0.04);
+  background:
+    linear-gradient(135deg, rgba(237,217,173,0.10), rgba(255,255,255,0.035), rgba(194,123,140,0.07));
   overflow: visible;
+  isolation: isolate;
 }
 .srv-card {
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(10px);
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(255,255,255,0.035), transparent 54%),
+    rgba(5, 3, 5, 0.72);
+  backdrop-filter: blur(12px) saturate(118%);
+  -webkit-backdrop-filter: blur(12px) saturate(118%);
   padding: 32px 28px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   position: relative;
   z-index: 1;
+  overflow: hidden;
   transform: translateY(0);
   transition:
-    transform 520ms var(--ease-out),
-    background 460ms var(--ease-out),
-    box-shadow 520ms var(--ease-out),
-    filter 520ms var(--ease-out);
+    transform 680ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 680ms var(--ease-out),
+    box-shadow 680ms var(--ease-out),
+    filter 680ms var(--ease-out);
 }
 .srv-card::before {
   content: '';
@@ -1084,22 +1090,50 @@ body::before {
   z-index: -1;
   opacity: 0;
   background:
-    linear-gradient(145deg, rgba(255,255,255,0.065), transparent 38%),
-    radial-gradient(ellipse at 85% 12%, rgba(201,169,110,0.12), transparent 58%);
-  transition: opacity 520ms var(--ease-out);
+    radial-gradient(ellipse at 50% 0%, rgba(237,217,173,0.16), transparent 58%),
+    radial-gradient(ellipse at 92% 16%, rgba(201,169,110,0.18), transparent 48%),
+    linear-gradient(145deg, rgba(255,255,255,0.072), transparent 42%);
+  transition:
+    opacity 720ms var(--ease-out),
+    transform 720ms var(--ease-out);
+  transform: scale(0.98);
+}
+.srv-card::after {
+  content: '';
+  position: absolute;
+  top: -52%;
+  bottom: -52%;
+  left: -82%;
+  width: 54%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.16), transparent);
+  opacity: 0;
+  transform: translateX(-22%) rotate(10deg);
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 860ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 .srv-card:hover {
   z-index: 5;
-  background: rgba(255,255,255,0.05);
-  transform: translateY(-8px);
-  filter: brightness(1.06);
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(237,217,173,0.08), transparent 58%),
+    rgba(14, 10, 12, 0.84);
+  transform: translateY(-7px) scale(1.008);
+  filter: brightness(1.045) saturate(1.04);
   box-shadow:
-    0 22px 52px rgba(0,0,0,0.32),
-    0 0 0 1px rgba(255,255,255,0.075),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    0 28px 64px rgba(0,0,0,0.38),
+    0 0 42px rgba(201,169,110,0.08),
+    0 0 0 1px rgba(237,217,173,0.13),
+    inset 0 1px 0 rgba(255,255,255,0.075);
 }
 .srv-card:hover::before {
   opacity: 1;
+  transform: scale(1);
+}
+.srv-card:hover::after {
+  opacity: 1;
+  transform: translateX(360%) rotate(10deg);
 }
 .srv-card-header {
   display: flex;
@@ -1111,17 +1145,26 @@ body::before {
   font-size: 16px;
   font-weight: 600;
   color: var(--text-1);
+  transition:
+    color 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
 }
 .srv-card-price {
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
+  transition:
+    filter 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
 }
 .srv-card-desc {
   color: var(--text-3);
   font-size: 14px;
   line-height: 1.7;
   flex: 1;
+  transition:
+    color 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
 }
 .srv-card-footer {
   display: flex;
@@ -1130,15 +1173,48 @@ body::before {
   margin-top: 8px;
   padding-top: 12px;
   border-top: 1px solid rgba(255,255,255,0.06);
+  transition:
+    border-color 520ms var(--ease-out),
+    transform 520ms var(--ease-out);
 }
-.srv-card-time { font-size: 12px; color: var(--text-3); }
+.srv-card:hover .srv-card-name {
+  color: rgba(255,255,255,0.96);
+  transform: translateY(-1px);
+}
+.srv-card:hover .srv-card-price {
+  filter: drop-shadow(0 0 12px rgba(201,169,110,0.28));
+  transform: translateY(-1px);
+}
+.srv-card:hover .srv-card-desc {
+  color: rgba(255,255,255,0.58);
+  transform: translateY(-1px);
+}
+.srv-card:hover .srv-card-footer {
+  border-top-color: rgba(237,217,173,0.14);
+  transform: translateY(1px);
+}
+.srv-card-time {
+  font-size: 12px;
+  color: var(--text-3);
+  transition: color 520ms var(--ease-out);
+}
 .srv-book-link {
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
-  transition: opacity 0.2s;
+  transition:
+    opacity 420ms var(--ease-out),
+    transform 520ms var(--ease-out),
+    filter 520ms var(--ease-out);
 }
-.srv-book-link:hover { opacity: 0.7; }
+.srv-card:hover .srv-card-time {
+  color: rgba(255,255,255,0.42);
+}
+.srv-card:hover .srv-book-link {
+  transform: translateX(3px);
+  filter: drop-shadow(0 0 10px rgba(201,169,110,0.28));
+}
+.srv-book-link:hover { opacity: 0.78; }
 
 .process-steps {
   display: grid;
