@@ -12,3 +12,5 @@ pnpm-debug.log*
 Thumbs.db
 .claude/
 Ctempvite_glamore.log
+
+.vercel

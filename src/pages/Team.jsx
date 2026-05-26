@@ -148,6 +148,10 @@ function TeamCard({ member, index }) {
         style={{ background: `linear-gradient(160deg, ${pal[0]}, ${pal[1]})` }}
         onMouseEnter={onEnter}
         onMouseLeave={onLeave}
+        onClick={() => {
+          // Toggle clean state on click for mobile support
+          if (clean) onLeave(); else onEnter();
+        }}
       >
         {/* Tan / dirt overlay */}
         <div className="tcp-tan" />

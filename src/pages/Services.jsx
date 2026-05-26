@@ -27,7 +27,10 @@ const categories = [
       { id: 'h1', name: 'The Glamore Cut', time: '90 min', price: '$120', desc: 'A bespoke consultation and precision cut tailored to your face shape, texture, and lifestyle.' },
       { id: 'h2', name: 'Red Carpet Blowout', time: '60 min', price: '$85', desc: 'High-volume, bouncy finish using premium heat-protectant silk proteins.' },
       { id: 'h3', name: 'Keratin Smoothing', time: '3 hours', price: '$320', desc: 'Advanced smoothing treatment that eliminates frizz for up to 12 weeks.' },
-      { id: 'h4', name: 'Deep Sea Ritual', time: '45 min', price: '$95', desc: 'Mineral-rich hydration mask and intense scalp micro-massage.' }
+      { id: 'h4', name: 'Deep Sea Ritual', time: '45 min', price: '$95', desc: 'Mineral-rich hydration mask and intense scalp micro-massage.' },
+      { id: 'h5', name: 'Red Carpet Updo', time: '90 min', price: '$150', desc: 'Sculpted formal styling for galas, premieres, and high-profile events.' },
+      { id: 'h6', name: 'Silk Press Ritual', time: '2 hours', price: '$135', desc: 'Non-chemical straightening ritual using thermal heat and organic serums for maximum shine.' },
+      { id: 'h7', name: 'Atelier Extensions', time: '5 hours', price: '$800', desc: 'Premium hand-tied weft application for seamless volume and length.' }
     ]
   },
   {
@@ -41,7 +44,8 @@ const categories = [
       { id: 'c1', name: 'Signature Balayage', time: '4 hours', price: '$295', desc: 'Hand-painted highlights for a sun-kissed, dimensional glow.' },
       { id: 'c2', name: 'Luxe Full Colour', time: '2 hours', price: '$165', desc: 'Rich, uniform pigment application using ammonia-free formulas.' },
       { id: 'c3', name: 'Platinum Restoration', time: '6 hours', price: '$450', desc: 'Ultimate blonde transformation with dual-stage lifting.' },
-      { id: 'c4', name: 'Gloss Refresh', time: '45 min', price: '$75', desc: 'Semi-permanent toner to neutralise brassiness and seal shine.' }
+      { id: 'c4', name: 'Gloss Refresh', time: '45 min', price: '$75', desc: 'Semi-permanent toner to neutralise brassiness and seal shine.' },
+      { id: 'c5', name: 'Colour Correction', time: '5 hours', price: '$500', desc: 'Advanced pigment removal and structural re-toning for complex transitions.' }
     ]
   },
   {
@@ -55,7 +59,9 @@ const categories = [
       { id: 'n1', name: 'Sculpted Extensions', time: '2 hours', price: '$130', desc: 'Extraordinarily durable extensions sculpted by hand with premium hard gel.' },
       { id: 'n2', name: 'Apothecary Mani', time: '75 min', price: '$85', desc: 'Organic herb soak, sea salt exfoliation, and targeted hydration treatment.' },
       { id: 'n3', name: 'Fine Line Artistry', time: '3 hours', price: '$180', desc: 'Intricate hand-painted patterns, gold leaf detailing, and 3D elements.' },
-      { id: 'n4', name: 'The Gel Overlay', time: '60 min', price: '$75', desc: 'Reinforced strength for natural nails with a high-gloss finish.' }
+      { id: 'n4', name: 'The Gel Overlay', time: '60 min', price: '$75', desc: 'Reinforced strength for natural nails with a high-gloss finish.' },
+      { id: 'n5', name: 'Silk Wrap Ritual', time: '90 min', price: '$110', desc: 'Traditional silk wrapping for natural strengthening and repair of delicate nails.' },
+      { id: 'n6', name: 'Crystal Adornment', time: '4 hours', price: '$240', desc: 'Premium Swarovski crystal placement and precision jewelry embedding for high-end occasions.' }
     ]
   },
   {
@@ -69,7 +75,8 @@ const categories = [
       { id: 'b1', name: 'Cryo-Glow Facial', time: '90 min', price: '$195', desc: 'Sculpting cold therapy combined with high-potency Vitamin C.' },
       { id: 'b2', name: 'Silk Lash Set', time: '2.5 hours', price: '$210', desc: 'Individual silk extensions applied strand-by-strand for dramatic volume.' },
       { id: 'b3', name: 'Brow Architecture', time: '45 min', price: '$85', desc: 'Custom mapping, bespoke tinting, and precision shaping.' },
-      { id: 'b4', name: 'Lash Lift & Tint', time: '60 min', price: '$115', desc: 'A chemical lift that curls your natural lashes from the root.' }
+      { id: 'b4', name: 'Lash Lift & Tint', time: '60 min', price: '$115', desc: 'A chemical lift that curls your natural lashes from the root.' },
+      { id: 'b5', name: 'Oxygen Recovery', time: '75 min', price: '$180', desc: 'Hyperbaric oxygen infusion to plump skin and reverse environmental fatigue.' }
     ]
   }
 ]
@@ -170,9 +177,13 @@ function ServiceListItem({ service, accent, onClick }) {
 export default function Services() {
   const [activeCat, setActiveCat] = useState(categories[0].id)
   const [selectedService, setSelectedService] = useState(null)
+  const [isNavMinimized, setIsNavMinimized] = useState(false)
+  const [isNavHovered, setIsNavHovered] = useState(false)
   const pageRef = useRef(null)
   const horizontalRef = useRef(null)
   const heroBgRef = useRef(null)
+
+  const navItemsRef = useRef([])
 
   useGSAP(() => {
     // 1. Hero Reveal Parallax (Scroll Driven)
@@ -199,84 +210,72 @@ export default function Services() {
       }
     });
 
-    // 2. Horizontal Scroll Section with 3D Depth
-    const sections = gsap.utils.toArray('.srv-cat-section');
-    const scrollTween = gsap.to(sections, {
-      xPercent: -100 * (sections.length - 1),
-      ease: 'none',
-      scrollTrigger: {
-        trigger: horizontalRef.current,
-        pin: true,
-        scrub: 1,
-        snap: 1 / (sections.length - 1),
-        end: () => `+=${horizontalRef.current.offsetWidth * 3}`, // Longer scroll for smoother feel
-        onUpdate: (self) => {
-          const index = Math.round(self.progress * (sections.length - 1));
-          if (categories[index]) setActiveCat(categories[index].id);
-        }
-      }
-    });
+    // MatchMedia for horizontal scroll
+    const mm = gsap.matchMedia();
 
-    // 3. Deep 3D Parallax for Backgrounds and Content while Scrolling
-    sections.forEach((section, i) => {
-      const img = section.querySelector('.srv-cat-img');
-      const info = section.querySelector('.srv-cat-info');
-      const listPanel = section.querySelector('.srv-cat-list-panel');
-
-      // Cinematic 3D Lens Zoom (No horizontal slide)
-      gsap.fromTo(img,
-        {
-          scale: 1.8,
-          rotateY: -15,
-          rotateX: 10,
-          z: -200,
-          opacity: 0.2
-        },
-        {
-          scale: 1,
-          rotateY: 15,
-          rotateX: -10,
-          z: 0,
-          opacity: 0.5,
+    mm.add("(min-width: 1101px)", () => {
+      // 2. Horizontal Scroll Section - Fully Dynamic for N categories
+      const sections = gsap.utils.toArray('.srv-cat-section');
+      if (sections.length > 0) {
+        const scrollTween = gsap.to(sections, {
+          xPercent: -100 * (sections.length - 1),
+          ease: 'none',
           scrollTrigger: {
-            trigger: section,
-            containerAnimation: scrollTween,
-            start: 'left right',
-            end: 'right left',
-            scrub: true
+            trigger: horizontalRef.current,
+            pin: true,
+            scrub: 1,
+            snap: sections.length > 1 ? 1 / (sections.length - 1) : 0,
+            end: () => `+=${sections.length * window.innerWidth}`,
+            onUpdate: (self) => {
+              const index = Math.round(self.progress * (sections.length - 1));
+              if (categories[index]) setActiveCat(categories[index].id);
+            }
           }
-        }
-      );
+        });
 
-      // Content Floating Entry
-      gsap.from(info, {
-        opacity: 0,
-        x: -100,
-        rotateY: -45,
-        scale: 0.9,
-        scrollTrigger: {
-          trigger: section,
-          containerAnimation: scrollTween,
-          start: 'left 80%',
-          end: 'left 20%',
-          scrub: 0.5
-        }
-      });
+        // 3. Deep Parallax for backgrounds and content
+        sections.forEach((section, i) => {
+          const img = section.querySelector('.srv-cat-img');
+          const info = section.querySelector('.srv-cat-info');
+          const listPanel = section.querySelector('.srv-cat-list-panel');
 
-      // List Panel Slide and Rise
-      gsap.from(listPanel, {
-        opacity: 0,
-        y: 100,
-        rotateX: -20,
-        z: -100,
-        scrollTrigger: {
-          trigger: section,
-          containerAnimation: scrollTween,
-          start: 'left 80%',
-          end: 'left 20%',
-          scrub: 0.5
-        }
-      });
+          gsap.fromTo(img,
+            { scale: 1.8, rotateY: -15, z: -200, opacity: 0.1 },
+            {
+              scale: 1, rotateY: 15, z: 0, opacity: 0.5,
+              scrollTrigger: {
+                trigger: section,
+                containerAnimation: scrollTween,
+                start: 'left right',
+                end: 'right left',
+                scrub: true
+              }
+            }
+          );
+
+          gsap.from(info, {
+            opacity: 0, x: -100, rotateY: -45,
+            scrollTrigger: {
+              trigger: section,
+              containerAnimation: scrollTween,
+              start: 'left 80%',
+              end: 'left 20%',
+              scrub: 0.5
+            }
+          });
+
+          gsap.from(listPanel, {
+            opacity: 0, y: 100, rotateX: -20,
+            scrollTrigger: {
+              trigger: section,
+              containerAnimation: scrollTween,
+              start: 'left 80%',
+              end: 'left 20%',
+              scrub: 0.5
+            }
+          });
+        });
+      }
     });
 
     // 4. Smooth Section Skew during scroll
@@ -294,6 +293,7 @@ export default function Services() {
       }
     });
 
+    return () => mm.revert();
   }, { scope: pageRef });
 
   const scrollToCategory = (id) => {
@@ -304,6 +304,8 @@ export default function Services() {
       window.scrollTo({ top: target, behavior: 'smooth' });
     }
   }
+
+  const isFullyExpanded = !isNavMinimized || isNavHovered;
 
   return (
     <motion.div ref={pageRef} className="premium-services-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -332,13 +334,35 @@ export default function Services() {
         </div>
       </section>
 
-      {/* 1. Atelier Luxury Sidebar Nav (Always Open & Innovative Highlight) */}
-      <nav className="srv-atelier-nav">
+      {/* 1. Atelier Luxury Sidebar Nav (With Minimize Toggle & Hover Expand) */}
+      <nav
+        className={`srv-atelier-nav${!isFullyExpanded ? ' minimized' : ''}`}
+        onMouseEnter={() => setIsNavHovered(true)}
+        onMouseLeave={() => setIsNavHovered(false)}
+      >
+        <button
+          className="nav-minimize-toggle"
+          onClick={() => {
+            setIsNavMinimized(!isNavMinimized);
+            setIsNavHovered(false); // Reset hover on click to prevent state stickiness
+          }}
+          aria-label={isNavMinimized ? "Expand Menu" : "Minimize Menu"}
+        >
+          <motion.div
+            animate={{ rotate: isNavMinimized ? 180 : 0 }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.div>
+        </button>
+
         <div className="nav-indicator-track">
           <motion.div
             className="nav-active-blob"
             animate={{
-              y: categories.findIndex(c => c.id === activeCat) * 76,
+              y: categories.findIndex(c => c.id === activeCat) * 72, // Responsive button height
               backgroundColor: categories.find(c => c.id === activeCat)?.accent
             }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -354,7 +378,11 @@ export default function Services() {
             <div className="san-icon-box">
               <span className="san-icon">{c.icon}</span>
             </div>
-            <div className="san-label-box">
+            <div className="san-label-box" style={{
+              opacity: isFullyExpanded ? 1 : 0,
+              transform: isFullyExpanded ? 'translateX(0)' : 'translateX(-10px)',
+              pointerEvents: isFullyExpanded ? 'auto' : 'none'
+            }}>
               <span className="san-label">{c.label}</span>
               <div className="san-progress-bar">
                 <motion.div
@@ -460,7 +488,7 @@ export default function Services() {
         @keyframes scroll-line-anim { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 50.1% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
         .srv-hero-scroll-cue span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3em; color: #fff; }
 
-        /* Atelier Sidebar Nav (Always Open) */
+        /* Atelier Sidebar Nav */
         .srv-atelier-nav {
           position: fixed; top: 50%; left: 30px; transform: translateY(-50%);
           display: flex; flex-direction: column; gap: 12px; z-index: 150;
@@ -468,8 +496,26 @@ export default function Services() {
           background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
           border: 1px solid rgba(255,255,255,0.05);
           width: 260px;
+          transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.6s ease;
         }
-        .nav-indicator-track { position: absolute; left: 18px; top: 34px; bottom: 34px; width: 1px; background: rgba(255,255,255,0.05); }
+
+        .srv-atelier-nav.minimized {
+          width: 88px;
+          padding: 24px 20px;
+          background: rgba(0,0,0,0.6);
+        }
+
+        .nav-minimize-toggle {
+          position: absolute; top: -15px; right: -15px; width: 34px; height: 34px;
+          background: var(--gold); color: #000; border: none; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          cursor: pointer; z-index: 10; box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+          transition: transform 0.3s ease;
+        }
+        .nav-minimize-toggle:hover { transform: scale(1.1); }
+
+        .nav-indicator-track { position: absolute; left: 18px; top: 34px; bottom: 34px; width: 1px; background: rgba(255,255,255,0.05); transition: opacity 0.4s ease; }
+        .srv-atelier-nav.minimized .nav-indicator-track { opacity: 0; }
         .nav-active-blob {
           position: absolute; left: -10px; top: 0; width: 44px; height: 44px;
           border-radius: 50%; filter: blur(20px); opacity: 0.4; z-index: 0;
@@ -483,13 +529,18 @@ export default function Services() {
         .san-icon-box {
           width: 40px; height: 40px; border-radius: 50%;
           display: flex; align-items: center; justify-content: center;
-          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
-          color: rgba(255,255,255,0.4); transition: all 0.4s ease;
+          background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+          color: rgba(255, 255, 255, 0.4); transition: all 0.4s ease;
           flex-shrink: 0;
         }
         .san-icon { font-size: 16px; }
 
-        .san-label-box { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+        .san-label-box {
+          display: flex; flex-direction: column; gap: 6px; text-align: left;
+          transition: opacity 0.4s ease, transform 0.4s ease;
+          white-space: nowrap;
+        }
+
         .san-label {
           font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
           color: rgba(255,255,255,0.4); font-weight: 700; transition: all 0.4s ease;
@@ -532,24 +583,56 @@ export default function Services() {
         .srv-cat-ambient-light { position: absolute; inset: 0; z-index: 1; opacity: 0.5; pointer-events: none; }
         .srv-cat-info { position: relative; z-index: 2; transform: translateZ(100px); will-change: transform, opacity; }
 
-        .srv-cat-list-panel { background: #000; height: 100vh; padding: 120px 10% 100px 4%; display: flex; flex-direction: column; justify-content: center; transform-style: preserve-3d; will-change: transform, opacity; }
-        .srv-list-scrollable { overflow-y: auto; padding: 20px 20px 20px 0; scrollbar-width: none; }
-        .srv-list-scrollable::-webkit-scrollbar { display: none; }
-        .srv-items-flex { display: flex; flex-direction: column; gap: 20px; }
-
-        /* List Item Card */
-        .srv-list-item {
-          position: relative; background: linear-gradient(135deg, #0a0a0a, #050505); border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 4px; padding: 28px 36px; cursor: pointer; border-left: 2px solid var(--accent);
-          transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        .srv-cat-list-panel {
+          background: #000;
+          height: 100vh;
+          padding: 6rem 8% 4rem 4%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          transform-style: preserve-3d;
+          will-change: transform, opacity;
         }
-        .sli-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .srv-list-scrollable { overflow-y: auto; padding: 1.5rem 1.5rem 1.5rem 0; scrollbar-width: none; width: 100%; }
+        .srv-list-scrollable::-webkit-scrollbar { display: none; }
+        .srv-items-flex {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
+          width: 100%;
+        }
+
+        /* List Item Card - Premium Glass Grid */
+        .srv-list-item {
+          position: relative;
+          background: rgba(255, 255, 255, 0.03);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 0.6rem;
+          padding: 1.2rem;
+          cursor: pointer;
+          border-left: 0.2rem solid var(--accent);
+          transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          overflow: hidden;
+          box-shadow: 0 0.8rem 2rem rgba(0,0,0,0.3);
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          min-height: 10rem;
+        }
+        .srv-list-item:hover {
+          background: rgba(255, 255, 255, 0.06);
+          transform: translateY(-8px) scale(1.02);
+          border-color: rgba(255, 255, 255, 0.2);
+          box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 20px color-mix(in srgb, var(--accent) 20%, transparent);
+        }
+        .sli-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .sli-id { font-size: 8px; text-transform: uppercase; letter-spacing: 0.3em; color: rgba(255,255,255,0.3); font-weight: 800; }
         .sli-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
-        .sli-name { font-family: var(--font-display); font-size: 26px; color: #fff; line-height: 1.1; margin-bottom: 16px; }
+        .sli-name { font-family: var(--font-display); font-size: 22px; color: #fff; line-height: 1.2; margin-bottom: 12px; }
         .sli-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-        .sli-price { font-family: var(--font-display); font-size: 22px; color: var(--accent); font-style: italic; }
-        .sli-more { font-size: 9px; text-transform: uppercase; color: rgba(255,255,255,0.2); letter-spacing: 0.15em; }
+        .sli-price { font-family: var(--font-display); font-size: 20px; color: var(--accent); font-style: italic; }
+        .sli-more { font-size: 8px; text-transform: uppercase; color: rgba(255,255,255,0.2); letter-spacing: 0.15em; }
         .sli-hover-bg { position: absolute; inset: 0; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent); opacity: 0; transition: opacity 0.5s; }
         .srv-list-item:hover .sli-hover-bg { opacity: 1; }
 

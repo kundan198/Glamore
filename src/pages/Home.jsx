@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
+// Assets - preserving existing imports
 import heroDirtyPortrait from '../assets/hero-dirty.png'
 import heroPrettyPortrait from '../assets/hero-preity.png'
 import hairColourPhoto from '../assets/haircolur.jpg'
@@ -16,507 +17,985 @@ import storyPortrait from '../assets/ya.jpg'
 
 gsap.registerPlugin(ScrollTrigger)
 
+/* ── CONSTANTS & VARIANTS ── */
+
 const services = [
-  { img: hairColourPhoto, title: 'Hair Colouring', sub: 'Balayage - Glossing - Toning', price: '$145' },
   { img: hairStylingPhoto, title: 'Master Styling', sub: 'Cuts - Blowouts - Finishing', price: '$85' },
-  { img: beautyTreatPhoto, title: 'Beauty Treatments', sub: 'Lashes - Brows - Facials', price: '$95' },
-  { img: nailArtPhoto, title: 'Nail Art', sub: 'Manicures - Extensions - Design', price: '$75' },
+  { img: hairColourPhoto, title: 'Hair Colouring', sub: 'Balayage - Glossing - Toning', price: '$145' },
   { img: makeupBridalPhoto, title: 'Makeup & Bridal', sub: 'Soft Glam - Bridal - Editorial', price: '$120' },
+  { img: nailArtPhoto, title: 'Nail Art', sub: 'Manicures - Extensions - Design', price: '$75' },
+  { img: beautyTreatPhoto, title: 'Skin Rituals', sub: 'Lashes - Brows - Facials', price: '$95' },
   { img: studioExpPhoto, title: 'Studio Experience', sub: 'Full Day - Occasion - Shoots', price: '$249' },
 ]
 
 const stats = [
-  ['500+', 'Happy Clients'],
-  ['8', 'Years of Art'],
-  ['6', 'Specialists'],
-  ['50+', 'Awards Won'],
+  { val: 500, suffix: '+', label: 'Happy Clients' },
+  { val: 8, suffix: '', label: 'Years of Art' },
+  { val: 50, suffix: '+', label: 'Awards Won' },
+  { val: 6, suffix: '', label: 'Specialists' },
 ]
 
-const tags = ['Signature Glow', 'Premium Care', 'Artistry', 'Confidence']
-
 const testimonials = [
-  { text: 'The studio feels calm, elegant, and precise. I left with exactly the look I had imagined.', author: 'Seraphina J.' },
-  { text: 'Every detail felt intentional, from the consultation to the final styling. A beautiful experience.', author: 'Elena M.' },
-  { text: 'Glamore gave me polished hair and makeup that lasted through the entire event.', author: 'Julian V.' },
+  { text: 'The studio feels calm, elegant, and precise. I left with exactly the look I had imagined.', author: 'Seraphina J.', img: hairStylingPhoto },
+  { text: 'Every detail felt intentional, from the consultation to the final styling. A beautiful experience.', author: 'Elena M.', img: makeupBridalPhoto },
+  { text: 'Glamore gave me polished hair and makeup that lasted through the entire event.', author: 'Julian V.', img: hairColourPhoto },
 ]
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 22 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.75, ease: 'easeOut' } },
+  hidden: { opacity: 0, y: 30, filter: 'blur(10px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 1, ease: [0.22, 1, 0.36, 1] } },
 }
 
-function BrushRevealPortrait() {
+/* ── COMPONENT: CINEMATIC SPLASH ── */
+
+function SplashIntro({ onComplete }) {
   const canvasRef = useRef(null)
-  const maskRef = useRef(null)
-  const dirtyImgRef = useRef(null)
-  const prettyImgRef = useRef(null)
-  const rafRef = useRef(null)
-  const lastPaintRef = useRef(null)
-  const isPaintingRef = useRef(false)
-  const [isPainting, setIsPainting] = useState(false)
-
-  const paintReveal = useCallback((xPct, yPct) => {
-    const mask = maskRef.current
-    if (!mask?.width || !mask.height) return
-
-    const ctx = mask.getContext('2d')
-    const x = (xPct / 100) * mask.width
-    const y = (yPct / 100) * mask.height
-    const radius = Math.min(mask.width, mask.height) * 0.115
-
-    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius)
-    gradient.addColorStop(0, 'rgba(255,255,255,1)')
-    gradient.addColorStop(0.34, 'rgba(255,255,255,0.94)')
-    gradient.addColorStop(0.68, 'rgba(255,255,255,0.44)')
-    gradient.addColorStop(0.91, 'rgba(255,255,255,0.11)')
-    gradient.addColorStop(1, 'rgba(255,255,255,0)')
-
-    ctx.fillStyle = gradient
-    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2)
-  }, [])
+  const containerRef = useRef(null)
+  const textRef = useRef(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas) return undefined
-
-    const mask = document.createElement('canvas')
-    maskRef.current = mask
-
-    const canvasCtx = canvas.getContext('2d')
-    const maskCtx = mask.getContext('2d')
-    let dirtyLayer = null
-    let prettyLayer = null
-    let layerWidth = 0
-    let layerHeight = 0
-
-    const drawCover = (ctx, img, filter) => {
-      if (!img?.complete || !img.naturalWidth) return
-      const width = ctx.canvas.width
-      const height = ctx.canvas.height
-      const scale = Math.max(width / img.naturalWidth, height / img.naturalHeight)
-      const drawWidth = img.naturalWidth * scale
-      const drawHeight = img.naturalHeight * scale
-      const x = (width - drawWidth) / 2
-      const y = (height - drawHeight) * 0.16
-
-      if (filter) ctx.filter = filter
-      ctx.drawImage(img, x, y, drawWidth, drawHeight)
-      ctx.filter = 'none'
-    }
-
-    const createLayer = (img, removeDarkEdge = false) => {
-      if (!img?.complete || !img.naturalWidth || !canvas.width || !canvas.height) return null
-
-      const layer = document.createElement('canvas')
-      layer.width = canvas.width
-      layer.height = canvas.height
-      const ctx = layer.getContext('2d', { willReadFrequently: removeDarkEdge })
-      drawCover(ctx, img)
-
-      if (!removeDarkEdge) return layer
-
-      const image = ctx.getImageData(0, 0, layer.width, layer.height)
-      const data = image.data
-      const width = layer.width
-      const height = layer.height
-      const seen = new Uint8Array(width * height)
-      const stack = []
-
-      const isEdgeBg = (idx) => {
-        const p = idx * 4
-        return Math.max(data[p], data[p + 1], data[p + 2]) < 46
-      }
-
-      for (let x = 0; x < width; x += 1) {
-        stack.push(x, (height - 1) * width + x)
-      }
-      for (let y = 0; y < height; y += 1) {
-        stack.push(y * width, y * width + width - 1)
-      }
-
-      while (stack.length) {
-        const idx = stack.pop()
-        if (idx < 0 || idx >= seen.length || seen[idx] || !isEdgeBg(idx)) continue
-
-        seen[idx] = 1
-        const p = idx * 4
-        const max = Math.max(data[p], data[p + 1], data[p + 2])
-        data[p + 3] = max < 24 ? 0 : Math.round(data[p + 3] * Math.min(1, (max - 24) / 22))
-
-        const x = idx % width
-        if (x > 0) stack.push(idx - 1)
-        if (x < width - 1) stack.push(idx + 1)
-        stack.push(idx - width, idx + width)
-      }
-
-      ctx.putImageData(image, 0, 0)
-      return layer
-    }
-
-    const rebuildLayers = () => {
-      dirtyLayer = createLayer(dirtyImgRef.current)
-      prettyLayer = createLayer(prettyImgRef.current)
-      layerWidth = canvas.width
-      layerHeight = canvas.height
-    }
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    let particles = []
+    let animationFrame
+    const text = 'GLAMORE'
 
     const resize = () => {
-      const rect = canvas.getBoundingClientRect()
-      const width = Math.max(2, Math.round(rect.width))
-      const height = Math.max(2, Math.round(rect.height))
-
-      canvas.width = width
-      canvas.height = height
-      mask.width = width
-      mask.height = height
-      rebuildLayers()
-      paintReveal(54, 42)
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
     }
-
-    const observer = new ResizeObserver(resize)
-    observer.observe(canvas)
+    window.addEventListener('resize', resize)
     resize()
 
-    const tick = () => {
-      if (
-        layerWidth !== canvas.width ||
-        layerHeight !== canvas.height ||
-        (!dirtyLayer && dirtyImgRef.current?.complete) ||
-        (!prettyLayer && prettyImgRef.current?.complete)
-      ) {
-        rebuildLayers()
+    document.fonts.ready.then(() => {
+      if (!textRef.current) return
+      const style = window.getComputedStyle(textRef.current)
+      const fontSize = parseFloat(style.fontSize)
+      const letterSpacing = parseFloat(style.letterSpacing) || (fontSize * 0.25)
+      const fontWeight = style.fontWeight
+      const fontFamily = style.fontFamily
+
+      ctx.fillStyle = 'white'
+      ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`
+      ctx.textBaseline = 'middle'
+      ctx.textAlign = 'left'
+
+      let totalWidth = 0
+      const charWidths = []
+      for (let i = 0; i < text.length; i++) {
+        const w = ctx.measureText(text[i]).width
+        charWidths.push(w)
+        totalWidth += w
+        if (i < text.length - 1) totalWidth += letterSpacing
       }
 
-      canvasCtx.clearRect(0, 0, canvas.width, canvas.height)
+      let currentX = (canvas.width - totalWidth) / 2
+      const centerY = canvas.height / 2
 
-      if (prettyLayer) {
-        canvasCtx.drawImage(mask, 0, 0)
-        canvasCtx.globalCompositeOperation = 'source-in'
-        canvasCtx.drawImage(prettyLayer, 0, 0)
-        canvasCtx.globalCompositeOperation = 'source-over'
+      for (let i = 0; i < text.length; i++) {
+        ctx.fillText(text[i], currentX, centerY)
+        currentX += charWidths[i] + letterSpacing
       }
 
-      canvasCtx.globalCompositeOperation = 'destination-over'
-      if (dirtyLayer) canvasCtx.drawImage(dirtyLayer, 0, 0)
-      canvasCtx.globalCompositeOperation = 'source-over'
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      rafRef.current = requestAnimationFrame(tick)
-    }
+      const step = 4
+      for (let y = 0; y < canvas.height; y += step) {
+        for (let x = 0; x < canvas.width; x += step) {
+          if (imageData[(y * canvas.width + x) * 4 + 3] > 128) {
+            particles.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              targetX: x,
+              targetY: y,
+              size: Math.random() * 2 + 1,
+              color: `rgba(201, 169, 110, ${Math.random() * 0.7 + 0.3})`,
+              vx: 0, vy: 0,
+              friction: 0.88,
+              ease: 0.04 + Math.random() * 0.04
+            })
+          }
+        }
+      }
 
-    rafRef.current = requestAnimationFrame(tick)
+      const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        particles.forEach(p => {
+          const dx = p.targetX - p.x
+          const dy = p.targetY - p.y
+          p.vx += dx * p.ease
+          p.vy += dy * p.ease
+          p.vx *= p.friction
+          p.vy *= p.friction
+          p.x += p.vx
+          p.y += p.vy
 
-    const onImageLoad = () => {
-      rebuildLayers()
-      paintReveal(54, 42)
-    }
-    dirtyImgRef.current?.addEventListener('load', onImageLoad)
-    prettyImgRef.current?.addEventListener('load', onImageLoad)
+          ctx.fillStyle = p.color
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+          ctx.fill()
+        })
+        animationFrame = requestAnimationFrame(animate)
+      }
+      animate()
+    })
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        cancelAnimationFrame(animationFrame)
+        onComplete()
+      }
+    })
+
+    tl.to(textRef.current, { opacity: 1, duration: 1.2, ease: 'power2.inOut', delay: 0.3 })
+      .to(containerRef.current, {
+        opacity: 0,
+        scale: 1.1,
+        duration: 1.5,
+        ease: 'power2.inOut',
+        delay: 0.2
+      })
 
     return () => {
-      cancelAnimationFrame(rafRef.current)
-      observer.disconnect()
-      dirtyImgRef.current?.removeEventListener('load', onImageLoad)
-      prettyImgRef.current?.removeEventListener('load', onImageLoad)
-      maskRef.current = null
+      window.removeEventListener('resize', resize)
+      cancelAnimationFrame(animationFrame)
     }
-  }, [paintReveal])
-
-  const addBrushPoint = useCallback((event, force = false) => {
-    if (!force && !isPaintingRef.current && event.pointerType !== 'mouse') return
-
-    const rect = event.currentTarget.getBoundingClientRect()
-    const x = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100))
-    const y = Math.max(0, Math.min(100, ((event.clientY - rect.top) / rect.height) * 100))
-
-    event.currentTarget.style.setProperty('--brush-x', `${x}%`)
-    event.currentTarget.style.setProperty('--brush-y', `${y}%`)
-
-    const last = lastPaintRef.current
-    const dx = last ? x - last.x : 0
-    const dy = last ? y - last.y : 0
-    const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 3))
-
-    for (let i = 1; i <= steps; i += 1) {
-      const t = i / steps
-      paintReveal(last ? last.x + dx * t : x, last ? last.y + dy * t : y)
-    }
-
-    lastPaintRef.current = { x, y }
-  }, [paintReveal])
-
-  const beginBrush = (event) => {
-    isPaintingRef.current = true
-    setIsPainting(true)
-    event.currentTarget.setPointerCapture?.(event.pointerId)
-    addBrushPoint(event, true)
-  }
-
-  const enterBrush = (event) => {
-    if (event.pointerType !== 'mouse') return
-    isPaintingRef.current = true
-    setIsPainting(true)
-    addBrushPoint(event, true)
-  }
-
-  const endBrush = () => {
-    isPaintingRef.current = false
-    lastPaintRef.current = null
-    setIsPainting(false)
-  }
-
-  const resetBrush = () => {
-    const mask = maskRef.current
-    if (!mask) return
-    const ctx = mask.getContext('2d')
-    ctx.clearRect(0, 0, mask.width, mask.height)
-    paintReveal(54, 42)
-  }
+  }, [onComplete])
 
   return (
-    <motion.div
-      className={`home-brush-card${isPainting ? ' is-painting' : ''}`}
-      initial={{ opacity: 0, y: 30, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.9, ease: 'easeOut', delay: 0.22 }}
-    >
-      <div className="home-brush-aura" aria-hidden="true" />
-      <div className="home-brush-botanical" aria-hidden="true">
-        <span className="brush-stem brush-stem-a" />
-        <span className="brush-stem brush-stem-b" />
-        <span className="brush-stem brush-stem-c" />
-        <span className="brush-bloom brush-bloom-a" />
-        <span className="brush-bloom brush-bloom-b" />
-        <span className="brush-bloom brush-bloom-c" />
-      </div>
-      <div
-        className="home-brush-frame"
-        onPointerDown={beginBrush}
-        onPointerEnter={enterBrush}
-        onPointerMove={addBrushPoint}
-        onPointerUp={endBrush}
-        onPointerCancel={endBrush}
-        onPointerLeave={endBrush}
-      >
-        <div className="home-brush-backplate" aria-hidden="true" />
-        <canvas ref={canvasRef} className="home-brush-canvas" aria-label="Brush reveal beauty portrait" />
-        <img ref={dirtyImgRef} className="home-brush-source" src={heroDirtyPortrait} alt="" aria-hidden="true" />
-        <img ref={prettyImgRef} className="home-brush-source" src={heroPrettyPortrait} alt="" aria-hidden="true" />
-        <div className="home-brush-orbit" aria-hidden="true" />
-        <div className="home-magic-reveal" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-          <span />
-          <span />
-        </div>
-        <div className="home-brush-hint">Move to transform</div>
-      </div>
-      <div className="home-brush-badge" aria-hidden="true">
-        <span>Glamore</span>
-        <strong>Signature Glow</strong>
-      </div>
-      <button className="home-brush-reset" type="button" onClick={resetBrush}>
-        Reset Mask
-      </button>
-    </motion.div>
-  )
-}
-
-function GoldenFlowers() {
-  return (
-    <div className="home-gold-flowers" aria-hidden="true">
-      <span className="home-flower flower-a" />
-      <span className="home-flower flower-b" />
-      <span className="home-flower flower-c" />
-      <span className="home-petal petal-a" />
-      <span className="home-petal petal-b" />
-      <span className="home-petal petal-c" />
+    <div ref={containerRef} className="glamore-splash">
+      <div className="splash-aura" />
+      <div className="splash-grain" />
+      <canvas ref={canvasRef} className="glamore-splash-canvas" />
+      <h1 ref={textRef} className="glamore-logo-metallic" style={{
+        opacity: 0,
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        margin: 0,
+        padding: 0,
+        zIndex: 10,
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none'
+      }}>GLAMORE</h1>
+      <div className="glamore-splash-overlay" />
     </div>
   )
 }
 
-export default function Home() {
-  const serviceSectionRef = useRef(null)
-  const serviceTrackRef = useRef(null)
-  const [activeService, setActiveService] = useState(0)
+/* ── COMPONENT: INTERACTIVE BEAUTY PORTRAIT ── */
+
+function BrushRevealPortrait() {
+  const canvasRef = useRef(null)
+  const revealMaskRef = useRef(null)
+  const tempCanvasRef = useRef(null) // Persistent buffer
+  const dirtyImgRef = useRef(null)
+  const prettyImgRef = useRef(null)
+  const isHoveringRef = useRef(false)
+  const lastPaintRef = useRef(null)
+  const lastActivityRef = useRef(Date.now())
+  const rafRef = useRef(null)
+  const particlesRef = useRef([])
+  const [isBrushing, setIsBrushing] = useState(false)
+  const [imagesLoaded, setImagesLoaded] = useState(false)
 
   useEffect(() => {
-    const section = serviceSectionRef.current
-    const track = serviceTrackRef.current
-    if (!section || !track) return undefined
+    let count = 0
+    const check = () => {
+      const d = dirtyImgRef.current
+      const p = prettyImgRef.current
+      if (d?.complete && d.naturalWidth && p?.complete && p.naturalWidth) {
+        setImagesLoaded(true)
+      } else if (count < 60) {
+        count++
+        setTimeout(check, 100)
+      }
+    }
+    check()
+  }, [])
 
+  useEffect(() => {
+    const pCanvas = canvasRef.current
+    if (!pCanvas || !imagesLoaded) return
+
+    const mask = document.createElement('canvas')
+    revealMaskRef.current = mask
+
+    const tempCanvas = document.createElement('canvas')
+    tempCanvasRef.current = tempCanvas
+
+    const pCtx = pCanvas.getContext('2d', { alpha: true })
+    const mCtx = mask.getContext('2d')
+
+    let dirtyCache = null
+    let prettyCache = null
+    let fadeMask = null
+
+    const buildFadeMask = (W, H) => {
+      const fm = document.createElement('canvas')
+      fm.width = W; fm.height = H
+      const fc = fm.getContext('2d')
+      fc.fillStyle = 'white'
+      fc.fillRect(0, 0, W, H)
+      fc.globalCompositeOperation = 'destination-out'
+      const addFade = (x0, y0, x1, y1, rx, ry, rw, rh) => {
+        const g = fc.createLinearGradient(x0, y0, x1, y1)
+        g.addColorStop(0, 'rgba(0,0,0,1)')
+        g.addColorStop(1, 'rgba(0,0,0,0)')
+        fc.fillStyle = g
+        fc.fillRect(rx, ry, rw, rh)
+      }
+      addFade(0, 0, 0, H * 0.12, 0, 0, W, H * 0.12)
+      addFade(0, H, 0, H * 0.88, 0, H * 0.88, W, H * 0.12)
+      addFade(0, 0, W * 0.1, 0, 0, 0, W * 0.1, H)
+      addFade(W, 0, W * 0.9, 0, W * 0.9, 0, W * 0.1, H)
+      return fm
+    }
+
+    const drawCover = (ctx, img, W, H) => {
+      const scale = Math.max(W / img.naturalWidth, H / img.naturalHeight)
+      const dW = img.naturalWidth * scale, dH = img.naturalHeight * scale
+      const dx = (W - dW) / 2, dy = (H - dH) / 2
+      ctx.drawImage(img, dx, dy, dW, dH)
+    }
+
+    const createLayerBuffer = (img, W, H) => {
+      if (!img?.naturalWidth) return null
+      const cvs = document.createElement('canvas')
+      cvs.width = W; cvs.height = H
+      drawCover(cvs.getContext('2d'), img, W, H)
+      return cvs
+    }
+
+    const resize = () => {
+      const rect = pCanvas.getBoundingClientRect()
+      const dpr = window.devicePixelRatio || 1
+      const W = Math.floor(rect.width * dpr)
+      const H = Math.floor(rect.height * dpr)
+      if (W === 0 || H === 0) return
+
+      pCanvas.width = W
+      pCanvas.height = H
+      mask.width = W
+      mask.height = H
+      tempCanvas.width = W
+      tempCanvas.height = H
+
+      mCtx.lineCap = 'round'
+      mCtx.lineJoin = 'round'
+      fadeMask = buildFadeMask(W, H)
+
+      dirtyCache = createLayerBuffer(dirtyImgRef.current, W, H)
+      prettyCache = createLayerBuffer(prettyImgRef.current, W, H)
+    }
+
+    const tick = () => {
+      const PW = pCanvas.width, PH = pCanvas.height
+      if (PW === 0 || PH === 0) {
+        rafRef.current = requestAnimationFrame(tick)
+        return
+      }
+
+      const now = Date.now()
+      if (!isHoveringRef.current && now - lastActivityRef.current > 3000) {
+        mCtx.globalCompositeOperation = 'destination-in'
+        mCtx.fillStyle = 'rgba(0,0,0,0.995)'
+        mCtx.fillRect(0, 0, PW, PH)
+        mCtx.globalCompositeOperation = 'source-over'
+      }
+
+      pCtx.clearRect(0, 0, PW, PH)
+      if (dirtyCache) pCtx.drawImage(dirtyCache, 0, 0)
+
+      if (prettyCache && tempCanvasRef.current) {
+        const tCanvas = tempCanvasRef.current
+        const tCtx = tCanvas.getContext('2d')
+
+        tCtx.clearRect(0, 0, PW, PH)
+        tCtx.globalCompositeOperation = 'source-over'
+        tCtx.drawImage(mask, 0, 0)
+        tCtx.globalCompositeOperation = 'source-in'
+        tCtx.drawImage(prettyCache, 0, 0)
+
+        pCtx.save()
+        if (isHoveringRef.current) {
+          pCtx.shadowBlur = 40
+          pCtx.shadowColor = 'rgba(201, 169, 110, 0.5)'
+        }
+        pCtx.drawImage(tCanvas, 0, 0)
+        pCtx.restore()
+      }
+
+      if (fadeMask) {
+        pCtx.globalCompositeOperation = 'destination-in'
+        pCtx.drawImage(fadeMask, 0, 0)
+        pCtx.globalCompositeOperation = 'source-over'
+      }
+
+      particlesRef.current.forEach(p => {
+        p.x += p.vx; p.y += p.vy
+        p.life -= 0.015; p.vx *= 0.98; p.vy *= 0.98
+      })
+      particlesRef.current = particlesRef.current.filter(p => p.life > 0)
+      particlesRef.current.forEach(p => {
+        pCtx.fillStyle = `rgba(201, 169, 110, ${p.life * 0.8})`
+        pCtx.beginPath(); pCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2); pCtx.fill()
+      })
+
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    const ro = new ResizeObserver(resize)
+    ro.observe(pCanvas)
+    resize()
+    tick()
+
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      ro.disconnect()
+    }
+  }, [imagesLoaded])
+
+  const paintReveal = useCallback((cx_pct, cy_pct) => {
+    const mask = revealMaskRef.current
+    if (!mask) return
+    const mCtx = mask.getContext('2d')
+    const x = (cx_pct / 100) * mask.width
+    const y = (cy_pct / 100) * mask.height
+    const r = Math.min(mask.width, mask.height) * 0.22
+
+    const grad = mCtx.createRadialGradient(x, y, 0, x, y, r)
+    grad.addColorStop(0, 'rgba(255,255,255,1)')
+    grad.addColorStop(0.4, 'rgba(255,255,255,0.7)')
+    grad.addColorStop(1, 'rgba(255,255,255,0)')
+
+    mCtx.save()
+    mCtx.fillStyle = grad
+    mCtx.globalCompositeOperation = 'source-over'
+    mCtx.beginPath(); mCtx.arc(x, y, r, 0, Math.PI * 2); mCtx.fill()
+    mCtx.restore()
+
+    for (let i = 0; i < 3; i++) {
+      particlesRef.current.push({
+        x: x + (Math.random() - 0.5) * 40,
+        y: y + (Math.random() - 0.5) * 40,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2 - 1,
+        size: Math.random() * 2 + 0.5,
+        life: 1
+      })
+    }
+    lastActivityRef.current = Date.now()
+  }, [])
+
+  const handlePointer = useCallback((e) => {
+    if (!isHoveringRef.current && e.type !== 'pointerdown') return
+    const rect = canvasRef.current.getBoundingClientRect()
+    const cx = ((e.clientX - rect.left) / rect.width) * 100
+    const cy = ((e.clientY - rect.top) / rect.height) * 100
+    const last = lastPaintRef.current
+    const dx = last ? cx - last.x : 0
+    const dy = last ? cy - last.y : 0
+    const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 1.5))
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps
+      paintReveal(last ? last.x + dx * t : cx, last ? last.y + dy * t : cy)
+    }
+    lastPaintRef.current = { x: cx, y: cy }
+    e.currentTarget.style.setProperty('--brush-x', `${cx}%`)
+    e.currentTarget.style.setProperty('--brush-y', `${cy}%`)
+  }, [paintReveal])
+
+  const reset = () => {
+    const mask = revealMaskRef.current
+    if (!mask) return
+    mask.getContext('2d').clearRect(0, 0, mask.width, mask.height)
+    paintReveal(54, 42)
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(() => paintReveal(54, 42), 1000)
+    return () => clearTimeout(timer)
+  }, [paintReveal])
+
+  return (
+    <motion.div
+      className={`home-brush-card${isBrushing ? ' is-painting' : ''}`}
+      onPointerDown={(e) => {
+        if (e.target.closest('.home-brush-reset')) return
+        isHoveringRef.current = true
+        setIsBrushing(true)
+        handlePointer(e)
+        e.currentTarget.setPointerCapture(e.pointerId)
+      }}
+      onPointerMove={handlePointer}
+      onPointerUp={() => {
+        isHoveringRef.current = false
+        setIsBrushing(false)
+        lastPaintRef.current = null
+      }}
+    >
+      <div className="home-brush-aura" />
+      <div className="home-brush-frame">
+        <div className="home-brush-texture" />
+        <canvas ref={canvasRef} className="home-brush-canvas" />
+        <img ref={dirtyImgRef} src={heroDirtyPortrait} alt="" style={{ display: 'none' }} />
+        <img ref={prettyImgRef} src={heroPrettyPortrait} alt="" style={{ display: 'none' }} />
+        <div className="home-magic-reveal"><span /><span /><span /><span /><span /></div>
+        <div className="home-brush-hint">Brush to Reveal Glow</div>
+        <div className="portrait-float-tag pft-glow"><i className="pft-dot" /><span>Signature Glow</span></div>
+      </div>
+      <div className="home-brush-badge">
+        <span>Est. 2016</span>
+        <strong>Ritual of Artistry</strong>
+      </div>
+      <button className="home-brush-reset" onClick={reset}>Reset</button>
+    </motion.div>
+  )
+}
+
+/* ── COMPONENT: STATS COUNTER ── */
+
+function StatCounter({ target, suffix, label }) {
+  const [count, setCount] = useState(0)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        gsap.to({ val: 0 }, {
+          val: target,
+          duration: 2,
+          ease: 'power2.out',
+          onUpdate: function() {
+            setCount(Math.floor(this.targets()[0].val))
+          }
+        })
+        observer.disconnect()
+      }
+    }, { threshold: 0.5 })
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [target])
+
+  return (
+    <div ref={ref} className="stat-item">
+      <strong className="stat-num">{count}{suffix}</strong>
+      <span className="stat-label">{label}</span>
+    </div>
+  )
+}
+
+/* ── COMPONENT: FLOATING 3D ELEMENTS ── */
+
+function FloatingHeroElements() {
+  const elements = [
+    { size: 40, x: '10%', y: '20%', delay: 0 },
+    { size: 60, x: '85%', y: '15%', delay: 1 },
+    { size: 30, x: '75%', y: '80%', delay: 2 },
+    { size: 50, x: '5%', y: '70%', delay: 0.5 },
+  ]
+
+  return (
+    <div className="floating-hero-layer" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden' }}>
+      {elements.map((el, i) => (
+        <motion.div
+          key={i}
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{
+            opacity: [0.2, 0.5, 0.2],
+            scale: 1,
+            y: [0, -40, 0],
+            rotateX: [0, 180, 360],
+            rotateY: [0, 180, 360],
+          }}
+          transition={{
+            duration: 10 + i * 2,
+            repeat: Infinity,
+            delay: el.delay,
+            ease: "linear"
+          }}
+          style={{
+            position: 'absolute',
+            left: el.x,
+            top: el.y,
+            width: el.size,
+            height: el.size,
+            border: '1px solid rgba(201, 169, 110, 0.3)',
+            background: 'linear-gradient(135deg, rgba(201, 169, 110, 0.1), transparent)',
+            borderRadius: i % 2 === 0 ? '50%' : '4px',
+            backdropFilter: 'blur(2px)',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+/* ── MAIN HOME COMPONENT ── */
+
+export default function Home() {
+  const [loading, setLoading] = useState(true)
+  const heroRef = useRef(null)
+  const heroCopyRef = useRef(null)
+  const heroMediaRef = useRef(null)
+  const serviceSectionRef = useRef(null)
+  const serviceTrackRef = useRef(null)
+  const testimonialsSectionRef = useRef(null)
+  const testimonialsTrackRef = useRef(null)
+
+  // Preload hero assets while splash is showing
+  useEffect(() => {
+    const assets = [heroDirtyPortrait, heroPrettyPortrait, storyPortrait]
+    assets.forEach(src => {
+      const img = new Image()
+      img.src = src
+    })
+  }, [])
+
+  useEffect(() => {
+    if (loading) {
+      document.body.classList.add('glamore-splash-lock')
+    } else {
+      document.body.classList.remove('glamore-splash-lock')
+    }
+    return () => document.body.classList.remove('glamore-splash-lock')
+  }, [loading])
+
+  useEffect(() => {
+    if (loading) return
+    const handleMouseMove = (e) => {
+      const { clientX, clientY } = e
+      const { innerWidth, innerHeight } = window
+      const xPos = (clientX / innerWidth) - 0.5
+      const yPos = (clientY / innerHeight) - 0.5
+      gsap.to(heroCopyRef.current, {
+        rotateY: xPos * 10, rotateX: -yPos * 10, x: xPos * 20, y: yPos * 20,
+        duration: 1.2, ease: 'power2.out'
+      })
+      gsap.to(heroMediaRef.current, {
+        rotateY: xPos * 15, rotateX: -yPos * 15, x: -xPos * 30, y: -yPos * 30,
+        duration: 1.5, ease: 'power2.out'
+      })
+      gsap.to('.home-hero-bg', {
+        x: -xPos * 50, y: -yPos * 50, duration: 2, ease: 'power2.out'
+      })
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [loading])
+
+  useEffect(() => {
+    if (loading) return
     const mm = gsap.matchMedia()
+    mm.add('(min-width: 1025px)', () => {
+      const track = serviceTrackRef.current
+      const section = serviceSectionRef.current
+      if (!track || !section) return
+      const cards = gsap.utils.toArray('.home-horizontal-card')
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+      const cardWidth = 32 * rem
+      const gap = 10 * rem
+      const distance = (cards.length * cardWidth) + ((cards.length - 1) * gap) - cardWidth
+      const mainTimeline = gsap.timeline({
+        scrollTrigger: {
+          trigger: section, start: 'top top', end: () => `+=${distance * 1.5}`,
+          scrub: 1.2, pin: true, invalidateOnRefresh: true, anticipatePin: 1,
+        }
+      })
+      mainTimeline.to(track, { x: () => -distance, ease: 'none' })
+      cards.forEach((card, i) => {
+        const inner = card.querySelector('img')
+        const copy = card.querySelector('.home-horizontal-card-copy')
+        gsap.set(card, { transformPerspective: 2000 })
+        ScrollTrigger.create({
+          trigger: card, containerAnimation: mainTimeline,
+          start: 'left right', end: 'right left', scrub: true,
+          onUpdate: (self) => {
+            let dist = self.progress - 0.5
+            if (i === cards.length - 1 && mainTimeline.scrollTrigger.progress > 0.98) dist = 0
+            if (i === 0 && mainTimeline.scrollTrigger.progress < 0.02) dist = 0
+            const absDist = Math.abs(dist)
+            gsap.set(card, {
+              rotateY: dist * -60, z: -absDist * 300, scale: 1 - absDist * 0.3,
+              opacity: 1 - absDist, filter: `blur(${absDist * 8}px) brightness(${1 - absDist * 0.4})`,
+              transformOrigin: dist > 0 ? 'left center' : 'right center'
+            })
+            if (inner) gsap.set(inner, { x: dist * 100, scale: 1.1 + absDist * 0.1, rotateY: dist * 10 })
+            if (copy) gsap.set(copy, { z: 80, x: dist * -50, rotateY: dist * 8, opacity: 1 - absDist * 3 })
+          }
+        })
+      })
+      gsap.to('.home-service-rail i', {
+        scaleX: 1, ease: 'none',
+        scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance * 1.5}`, scrub: 1.2 }
+      })
+    })
+    return () => mm.revert()
+  }, [loading])
 
-    mm.add('(min-width: 821px)', () => {
-      const getDistance = () => Math.max(0, track.scrollWidth - window.innerWidth + window.innerWidth * 0.16)
+  useEffect(() => {
+    if (loading) return
+    gsap.to('.home-story-image img', {
+      y: -60, ease: 'none',
+      scrollTrigger: { trigger: '.home-story', start: 'top bottom', end: 'bottom top', scrub: true }
+    })
+  }, [loading])
 
-      const tween = gsap.to(track, {
-        x: () => -getDistance(),
-        ease: 'none',
+  useEffect(() => {
+    if (loading) return
+    const mm = gsap.matchMedia()
+    mm.add('(min-width: 1025px)', () => {
+      const section = testimonialsSectionRef.current
+      const cards = gsap.utils.toArray('.premium-testimonial-card')
+      if (!section || !cards.length) return
+
+      // 1. Initial Entrance (Fly in when section enters viewport)
+      gsap.fromTo(cards[0],
+        { y: 100, opacity: 0, rotateX: -20, scale: 0.9 },
+        {
+          y: 0, opacity: 1, rotateX: 0, scale: 1,
+          duration: 1.2, ease: 'power3.out', // Speed up from 1.5
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
+          },
+          onComplete: () => cards[0].classList.add('is-active')
+        }
+      )
+
+      // 2. Main Stacking Timeline
+      const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: () => `+=${getDistance() + window.innerHeight * 0.8}`,
-          scrub: 1,
+          end: `+=${cards.length * 100}%`, // Reduced from 150%
           pin: true,
-          anticipatePin: 1,
+          scrub: 0.8,
           invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const index = Math.round(self.progress * (services.length - 1))
-            setActiveService(Math.max(0, Math.min(services.length - 1, index)))
-          },
-        },
+        }
       })
 
-      return () => {
-        tween.scrollTrigger?.kill()
-        tween.kill()
-      }
-    })
+      cards.forEach((card, i) => {
+        if (i === 0) return // Already handled by intro
 
+        // Subsequent cards slide up and stack
+        tl.fromTo(card,
+          { y: '100vh', rotateX: -30, scale: 0.8, opacity: 0, z: -500 },
+          {
+            y: 0, rotateX: 0, scale: 1, opacity: 1, z: 0,
+            duration: 0.6, ease: 'power2.inOut',
+            onStart: () => card.classList.add('is-active'),
+            onReverseComplete: () => card.classList.remove('is-active')
+          },
+          i * 0.4 // Reduced from 0.5
+        )
+
+        // Previous cards push back and dim
+        tl.to(cards.slice(0, i), {
+          z: (idx, target) => - (i - idx) * 150,
+          y: (idx) => - (i - idx) * 40,
+          scale: (idx) => 1 - (i - idx) * 0.05,
+          opacity: (idx) => 1 - (i - idx) * 0.3,
+          filter: 'blur(4px)',
+          duration: 0.4,
+          ease: 'power2.inOut'
+        }, i * 0.4) // Reduced from 0.5
+      })
+    })
     return () => mm.revert()
-  }, [])
+  }, [loading])
 
   return (
-    <main className="home-redesign home-premium">
-      <section className="home-hero premium-home-hero">
-        <div className="home-hero-bg" aria-hidden="true" />
-        <GoldenFlowers />
-        <div className="home-hero-filigree" aria-hidden="true" />
-        <div className="home-hero-side-rule" aria-hidden="true" />
-        <div className="container home-hero-grid">
-          <motion.div
-            className="home-hero-copy"
-            initial="hidden"
-            animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.14 } } }}
-          >
-            <motion.p className="home-eyebrow" variants={fadeUp}>
-              &#10022; LOS ANGELES &bull; PREMIUM BEAUTY STUDIO
-            </motion.p>
-            <motion.h1 className="home-title" variants={fadeUp}>
-              <span>Reveal</span>
-              <em>Your</em>
-              <span>Glow.</span>
-            </motion.h1>
-            <motion.p className="home-lede" variants={fadeUp}>
-              A cinematic beauty ritual where skincare, makeup, and confidence
-              converge &mdash; crafted by artists who see beauty as a language.
-            </motion.p>
+    <>
+      <AnimatePresence>
+        {loading && (
+          <SplashIntro key="splash" onComplete={() => setLoading(false)} />
+        )}
+      </AnimatePresence>
 
-            <motion.div className="home-hero-stats" variants={fadeUp}>
-              {stats.map(([num, label]) => (
-                <div className="home-hero-stat" key={label}>
-                  <strong>{num}</strong>
-                  <span>{label}</span>
+      <motion.main
+        key="home"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+        className="home-premium"
+        style={{
+          visibility: loading ? 'hidden' : 'visible',
+          opacity: loading ? 0 : 1
+        }}
+      >
+          {/* 1. HERO SECTION */}
+          <section ref={heroRef} className="home-hero premium-home-hero" style={{ perspective: '2000px' }}>
+            <div className="home-hero-bg" />
+            <FloatingHeroElements />
+            <div className="home-hero-filigree" />
+            <div className="home-hero-side-rule" />
+            <div className="container home-hero-grid" style={{ transformStyle: 'preserve-3d' }}>
+              <motion.div
+                ref={heroCopyRef}
+                className="home-hero-copy"
+                initial="hidden"
+                animate="show"
+                variants={{
+                  show: {
+                    transition: {
+                      staggerChildren: 0.15,
+                      delayChildren: 0.4
+                    }
+                  }
+                }}
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <motion.p className="home-eyebrow" variants={fadeUp}>✦ Los Angeles Â· Premium Studio</motion.p>
+                <motion.h1
+                  className="home-title"
+                  variants={fadeUp}
+                  style={{ transform: 'translateZ(50px)' }}
+                  animate={{
+                    y: [0, -10, 0],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  <span>Reveal</span>
+                  <em>Your</em>
+                  <span>Glow.</span>
+                </motion.h1>
+                <motion.p className="home-lede" variants={fadeUp} style={{ transform: 'translateZ(30px)' }}>
+                  A cinematic beauty ritual where skincare, makeup, and confidence converge &mdash; crafted by artists who see beauty as a language.
+                </motion.p>
+                <motion.div className="home-hero-actions" variants={fadeUp} style={{ transform: 'translateZ(20px)' }}>
+                  <Link to="/booking" className="btn btn-gold">Book the Ritual</Link>
+                  <Link to="/services" className="btn btn-outline">Our Services</Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.div
+                ref={heroMediaRef}
+                initial={{ opacity: 0, scale: 0.9, filter: 'blur(20px)' }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  filter: 'blur(0px)',
+                  y: [0, 15, 0]
+                }}
+                transition={{
+                  opacity: { duration: 2, ease: [0.22, 1, 0.36, 1], delay: 0.6 },
+                  scale: { duration: 2, ease: [0.22, 1, 0.36, 1], delay: 0.6 },
+                  filter: { duration: 2, ease: [0.22, 1, 0.36, 1], delay: 0.6 },
+                  y: { duration: 5, repeat: Infinity, ease: "easeInOut" }
+                }}
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <div style={{ transform: 'translateZ(100px)' }}>
+                  <BrushRevealPortrait />
+                </div>
+              </motion.div>
+
+              <div className="home-hero-tags" style={{ transform: 'translateZ(150px)' }}>
+                <motion.span initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.2 }}><i>✦</i> Signature Care</motion.span>
+                <motion.span initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.4 }}><i>✦</i> Artistry</motion.span>
+                <motion.span initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.6 }}><i>✦</i> Confidence</motion.span>
+              </div>
+            </div>
+            <div className="scroll-cue">
+              <span className="cue-line" />
+              <span>Scroll</span>
+            </div>
+          </section>
+
+          {/* 2. LUXURY MARQUEE */}
+          <section className="luxury-marquee">
+            <div className="luxury-marquee-track">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="marquee-group">
+                  <span className="luxury-marquee-item">Bridal Glam</span>
+                  <span className="luxury-marquee-item">Â·</span>
+                  <span className="luxury-marquee-item">Hair Artistry</span>
+                  <span className="luxury-marquee-item">Â·</span>
+                  <span className="luxury-marquee-item">Skin Rituals</span>
+                  <span className="luxury-marquee-item">Â·</span>
+                  <span className="luxury-marquee-item">Nail Design</span>
+                  <span className="luxury-marquee-item">Â·</span>
                 </div>
               ))}
-            </motion.div>
+            </div>
+          </section>
 
-            <motion.div className="home-hero-actions" variants={fadeUp}>
-              <Link to="/booking" className="btn btn-gold">Book the Ritual</Link>
-              <Link to="/services" className="btn btn-outline">Explore Services</Link>
-            </motion.div>
-          </motion.div>
-
-          <BrushRevealPortrait />
-
-          <div className="home-hero-tags" aria-label="Glamore highlights">
-            {tags.map((tag) => (
-              <span key={tag}>
-                <i>&#10022;</i>
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="home-marquee" aria-label="Glamore services">
-        <div>
-          <span>Hair Colour</span>
-          <span>Bridal Glam</span>
-          <span>Nail Artistry</span>
-          <span>Skin Rituals</span>
-          <span>Studio Packages</span>
-        </div>
-      </section>
-
-      <section ref={serviceSectionRef} className="home-horizontal-services">
-        <div className="home-horizontal-bg" aria-hidden="true" />
-        <div className="home-horizontal-head">
-          <div>
-            <p className="home-eyebrow">What We Offer</p>
-            <h2>Our Signature <em>Services</em></h2>
-          </div>
-          <div className="home-service-progress" aria-label={`Service ${activeService + 1} of ${services.length}`}>
-            <span>{String(activeService + 1).padStart(2, '0')}</span>
-            <i />
-            <span>{String(services.length).padStart(2, '0')}</span>
-          </div>
-        </div>
-
-        <div ref={serviceTrackRef} className="home-horizontal-track">
-          {services.map((service, index) => (
-            <article className={`home-horizontal-card${index === activeService ? ' is-active' : ''}`} key={service.title}>
-              <img src={service.img} alt={service.title} />
-              <div className="home-horizontal-card-shade" />
-              <div className="home-horizontal-card-copy">
-                <span>Service {String(index + 1).padStart(2, '0')}</span>
-                <h3>{service.title}</h3>
-                <p>{service.sub}</p>
+          {/* 4. SERVICES HORIZONTAL SCROLL */}
+          <section ref={serviceSectionRef} className="home-horizontal-services">
+            <div className="home-horizontal-bg" />
+            <div className="home-horizontal-head">
+              <div className="home-horizontal-titles">
+                <p className="home-eyebrow">Our Mastery</p>
+                <h2>Signature <em>Services</em></h2>
+                <span className="home-index-start">01</span>
               </div>
-              <div className="home-horizontal-card-footer">
-                <strong>From {service.price}</strong>
-                <Link to="/booking">Book</Link>
+              <div className="home-service-progress">
+                <div className="home-service-rail"><i /></div>
+                <span>06</span>
               </div>
-            </article>
-          ))}
-        </div>
-      </section>
+            </div>
+            <div ref={serviceTrackRef} className="home-horizontal-track">
+              {services.map((s, i) => (
+                <div key={s.title} className="home-horizontal-card">
+                  <img src={s.img} alt={s.title} />
+                  <div className="home-horizontal-card-shade" />
+                  <div className="home-horizontal-card-copy">
+                    <span>{String(i + 1).padStart(2, '0')}</span>
+                    <h3>{s.title}</h3>
+                    <p>{s.sub}</p>
+                  </div>
+                  <div className="home-horizontal-card-footer">
+                    <strong>{s.price}</strong>
+                    <Link to="/booking">Reserve</Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
-      <section className="section home-story">
-        <div className="container home-story-grid">
-          <div className="home-story-image">
-            <img src={storyPortrait} alt="Glamore studio styling session" />
-          </div>
-          <div className="home-story-copy">
-            <p className="home-eyebrow">Our Story</p>
-            <h2>Artistry in every detail, comfort in every visit.</h2>
-            <p>
-              We designed Glamore for clients who want beauty care that feels considered, modern, and personal. Every appointment begins with a clear consultation and ends with a look that still feels like you.
-            </p>
-            <Link to="/about" className="btn btn-outline">Meet the Studio</Link>
-          </div>
-        </div>
-      </section>
+          {/* 5. STORY SECTION */}
+          <section className="section home-story" style={{ overflow: 'hidden' }}>
+            <div className="container home-story-grid">
+              <motion.div
+                className="home-story-image"
+                initial={{ opacity: 0, x: -100, scale: 0.95 }}
+                whileInView={{ opacity: 1, x: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <img src={storyPortrait} alt="Founder" style={{ filter: 'brightness(1.1) contrast(1.05)' }} />
+                <div className="story-image-overlay" />
+              </motion.div>
 
-      <section className="section home-testimonials">
-        <div className="container">
-          <div className="home-section-head center">
-            <p className="home-eyebrow">Client Notes</p>
-            <h2>Polished work, relaxed experience.</h2>
-          </div>
-          <div className="home-testimonial-grid">
-            {testimonials.map((item) => (
-              <article className="home-testimonial" key={item.author}>
-                <p>"{item.text}"</p>
-                <strong>{item.author}</strong>
-              </article>
+              <motion.div
+                className="home-story-copy"
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={{
+                  show: {
+                    transition: {
+                      staggerChildren: 0.2
+                    }
+                  }
+                }}
+              >
+                <motion.p className="home-eyebrow" variants={fadeUp}>The Atelier</motion.p>
+                <motion.h2
+                  variants={fadeUp}
+                  style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', lineHeight: 1.1, marginBottom: '2rem' }}
+                >
+                  Where beauty becomes a <em>cinematic</em> journey.
+                </motion.h2>
+                <motion.p variants={fadeUp} style={{ fontSize: '1.2rem', color: 'rgba(255,255,255,0.7)', maxWidth: '540px' }}>
+                  Glamore was founded on the belief that beauty isn't just about the final look&mdash;it's about the feeling of being seen, heard, and transformed through artistry that respects your individuality.
+                </motion.p>
+                <motion.div variants={fadeUp} style={{ marginTop: '2.5rem' }}>
+                  <Link to="/about" className="btn btn-outline">Our Story</Link>
+                </motion.div>
+              </motion.div>
+            </div>
+          </section>
+
+          {/* 6. STATS SECTION */}
+          <section className="numbers-strip">
+            {stats.map(s => (
+              <StatCounter key={s.label} {...s} target={s.val} />
             ))}
-          </div>
-        </div>
-      </section>
+          </section>
 
-      <section className="home-cta">
-        <div className="container home-cta-inner">
-          <div>
-            <p className="home-eyebrow">Ready when you are</p>
-            <h2>Plan your next beauty ritual.</h2>
-          </div>
-          <Link to="/booking" className="btn btn-gold">Book Your Appointment</Link>
-        </div>
-      </section>
-    </main>
+          {/* 7. TESTIMONIALS CAROUSEL */}
+          <section ref={testimonialsSectionRef} className="section testimonials-section" style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+            <div className="testimonials-bg-aura" />
+            <div className="container" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <div className="home-section-head center">
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="home-eyebrow"
+                >
+                  Client Voices
+                </motion.p>
+                <motion.h2
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                >
+                  The <em>Experience</em>
+                </motion.h2>
+              </div>
+              <div className="home-testimonial-stack" style={{ position: 'relative', height: '500px', width: '100%', display: 'flex', justifyContent: 'center', perspective: '2000px', transformStyle: 'preserve-3d' }}>
+                {testimonials.map((t, i) => (
+                  <motion.div
+                    key={t.author}
+                    className="home-testimonial premium-testimonial-card"
+                    onMouseMove={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const x = e.clientX - rect.left
+                      const y = e.clientY - rect.top
+                      e.currentTarget.style.setProperty('--mouse-x', `${x}px`)
+                      e.currentTarget.style.setProperty('--mouse-y', `${y}px`)
+                    }}
+                    initial={{ opacity: 0, y: 100 }}
+                    style={{
+                      position: 'absolute',
+                      width: 'min(100%, 700px)',
+                      top: 0,
+                      transformStyle: 'preserve-3d',
+                      zIndex: i
+                    }}
+                  >
+                    <div className="card-edge-highlight" />
+                    <div className="value-card-inner">
+                      <div className="testimonial-quote-icon">â€œ</div>
+                      <p>"{t.text}"</p>
+                      <div className="testimonial-footer">
+                        <div className="testimonial-author-line" />
+                        <strong>{t.author}</strong>
+                      </div>
+                    </div>
+                    <div className="testimonial-card-glow" />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* 8. CTA SECTION */}
+          <section className="home-cta">
+            <div className="container home-cta-inner">
+              <div className="cta-text">
+                <p className="home-eyebrow">Ready for the transformation?</p>
+                <h2>Your next ritual awaits.</h2>
+              </div>
+              <Link to="/booking" className="btn btn-gold">Reserve Your Session</Link>
+            </div>
+          </section>
+
+          {/* 9. FOOTER */}
+          <footer className="footer-mini">
+            <div className="container center">
+              <div className="footer-logo">GLAMORE</div>
+              <p className="t-dim">Â© 2024 GLAMORE ATELIER. ALL RIGHTS RESERVED.</p>
+              <div className="footer-socials" style={{ justifyContent: 'center', marginTop: '30px' }}>
+                <a href="#" className="footer-social">IG</a>
+                <a href="#" className="footer-social">FB</a>
+                <a href="#" className="footer-social">TW</a>
+              </div>
+            </div>
+          </footer>
+        </motion.main>
+    </>
   )
 }

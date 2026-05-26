@@ -15,7 +15,7 @@ import { useEffect, useRef } from 'react'
   and never saturate to white.
 */
 
-const RES = 6
+const getRes = () => window.innerWidth < 768 ? 10 : 6
 const DAMP = 0.9945
 
 export default function WaterSurface() {
@@ -28,16 +28,18 @@ export default function WaterSurface() {
     const ctx = canvas.getContext('2d')
     let cols, rows, cur, prv, idata, simCvs, simCtx
     let rafId = null
+    let res = getRes()
 
     const smoothstep = v => v * v * (3 - 2 * v)
     const clamp = (v, lo, hi) => v < lo ? lo : v > hi ? hi : v
 
     function init() {
+      res = getRes()
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
 
-      cols = Math.ceil(canvas.width / RES)
-      rows = Math.ceil(canvas.height / RES)
+      cols = Math.ceil(canvas.width / res)
+      rows = Math.ceil(canvas.height / res)
 
       const n = cols * rows
       cur = new Float32Array(n)
@@ -51,8 +53,8 @@ export default function WaterSurface() {
     }
 
     function disturb(px, py, strength, radius) {
-      const cx = Math.floor(px / RES)
-      const cy = Math.floor(py / RES)
+      const cx = Math.floor(px / res)
+      const cy = Math.floor(py / res)
       const r = Math.ceil(radius)
 
       for (let dy = -r; dy <= r; dy++) {
