@@ -1,6 +1,11 @@
 import { useEffect } from 'react'
 
-/* Water-drop ripple cursor trail. */
+/* ─────────────────────────────────────────────────────────────
+   Water-drop ripple cursor trail.
+   Each mousemove spawns 3 concentric rings (staggered 80 ms apart)
+   that look like a droplet hitting a golden water surface.
+   Clicks spawn a stronger burst (5 rings, higher amplitude).
+───────────────────────────────────────────────────────────── */
 export default function GlobalRipple() {
   useEffect(() => {
     let lastMove = 0
@@ -11,11 +16,11 @@ export default function GlobalRipple() {
         const ring = document.createElement('span')
         ring.className = 'water-drop-ring'
         ring.style.left = `${x}px`
-        ring.style.top = `${y}px`
-        ring.style.setProperty('--ring-delay', `${i * baseDelay}ms`)
-        ring.style.setProperty('--ring-scale', `${sizeMulti + i * 2.4}`)
+        ring.style.top  = `${y}px`
+        ring.style.setProperty('--ring-delay',    `${i * baseDelay}ms`)
+        ring.style.setProperty('--ring-scale',    `${sizeMulti + i * 2.4}`)
         ring.style.setProperty('--ring-strength', strength)
-        ring.style.setProperty('--ring-index', i)
+        ring.style.setProperty('--ring-index',    i)
         document.body.appendChild(ring)
         setTimeout(() => ring.remove(), 1000 + i * baseDelay + 200)
       }
@@ -23,7 +28,7 @@ export default function GlobalRipple() {
 
     const onMove = e => {
       const now = performance.now()
-      if (now - lastMove < 140) return
+      if (now - lastMove < 140) return   // throttle to ~7/sec
       lastMove = now
       spawn(e.clientX, e.clientY, 2, 90, 2.6, 0.4)
     }
@@ -35,11 +40,11 @@ export default function GlobalRipple() {
       spawn(e.clientX, e.clientY, 3, 70, 3.2, 0.8)
     }
 
-    window.addEventListener('pointermove', onMove, { passive: true })
-    window.addEventListener('click', onClick, { passive: true })
+    window.addEventListener('pointermove', onMove,  { passive: true })
+    window.addEventListener('click',       onClick, { passive: true })
     return () => {
       window.removeEventListener('pointermove', onMove)
-      window.removeEventListener('click', onClick)
+      window.removeEventListener('click',       onClick)
     }
   }, [])
 
