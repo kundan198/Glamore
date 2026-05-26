@@ -1,267 +1,600 @@
-import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import { motion, AnimatePresence } from 'framer-motion'
+
+// Asset Imports
+import servHero from '../assets/serv.png'
+import hairStylingImg from '../assets/servise3.jpg'
+import hairColourImg from '../assets/haircolur.jpg'
+import beautyImg from '../assets/servise4.jpg'
+import makeupImg from '../assets/servise5.jpg'
+import nailsImg from '../assets/servise6.jpg'
+
+gsap.registerPlugin(ScrollTrigger);
 
 const categories = [
   {
     id: 'hair-styling',
-    label: 'Hair Styling & Care',
+    label: 'Hair Styling',
     icon: '✦',
-    gradient: 'linear-gradient(135deg, #1a0a14 0%, #2d1428 100%)',
     accent: '#C9A96E',
-    intro: 'From precision cuts to transformative blowouts, our stylists craft looks that move beautifully through your day.',
+    image: hairStylingImg,
+    intro: 'Precision architecture designed to move with you.',
     services: [
-      { name: 'The Glamore Cut', time: '60–90 min', price: 'From $120', desc: 'A full consultation and precision cut tailored to your face shape, texture, and lifestyle.' },
-      { name: 'Blowout & Style', time: '45 min', price: 'From $75', desc: 'Volume, bounce, or sleek — our blowouts last. Includes deep conditioning spray.' },
-      { name: 'Deep Conditioning Treatment', time: '30 min', price: 'From $55', desc: "Protein or moisture treatments customised to your hair's current needs." },
-      { name: 'Keratin Smoothing', time: '2–3 hours', price: 'From $280', desc: 'Up to 12 weeks of frizz control and mirror shine. Safe for colour-treated hair.' },
-      { name: 'Scalp Ritual', time: '45 min', price: 'From $85', desc: 'Exfoliation, massage, and targeted treatment for scalp health and hair growth.' },
-      { name: 'Extension Consultation', time: '30 min', price: 'Complimentary', desc: 'Full strand-by-strand assessment before any extension service.' },
+      { id: 'h1', name: 'The Glamore Cut', time: '90 min', price: '$120', desc: 'A bespoke consultation and precision cut tailored to your face shape, texture, and lifestyle.' },
+      { id: 'h2', name: 'Red Carpet Blowout', time: '60 min', price: '$85', desc: 'High-volume, bouncy finish using premium heat-protectant silk proteins.' },
+      { id: 'h3', name: 'Keratin Smoothing', time: '3 hours', price: '$320', desc: 'Advanced smoothing treatment that eliminates frizz for up to 12 weeks.' },
+      { id: 'h4', name: 'Deep Sea Ritual', time: '45 min', price: '$95', desc: 'Mineral-rich hydration mask and intense scalp micro-massage.' }
     ]
   },
   {
     id: 'hair-colour',
-    label: 'Hair Colouring',
+    label: 'Hair Colour',
     icon: '◈',
-    gradient: 'linear-gradient(135deg, #0d0d1a 0%, #1a1530 100%)',
     accent: '#8B7FD4',
-    intro: 'Colour is light. Our colourists are painters, mixing bespoke tones that evolve beautifully as they grow out.',
+    image: hairColourImg,
+    intro: 'Bespoke tones mixed like fine art.',
     services: [
-      { name: 'Signature Balayage', time: '3–4 hours', price: 'From $295', desc: 'Our most popular service. Hand-painted highlights for a naturally sun-kissed result.' },
-      { name: 'Full Colour', time: '90 min', price: 'From $145', desc: 'Rich, even all-over colour with precision application for zero root lines.' },
-      { name: 'Foilayage', time: '3.5 hours', price: 'From $320', desc: 'The precision of foil highlights with the softness of balayage.' },
-      { name: 'Toning & Glossing', time: '45 min', price: 'From $65', desc: 'Refresh and seal your colour with a custom-blended gloss treatment.' },
-      { name: 'Colour Correction', time: '4–8 hours', price: 'Consultation', desc: 'Complex colour corrections handled with care and a clear timeline.' },
-      { name: 'Grey Blending', time: '2 hours', price: 'From $175', desc: 'Seamlessly blend or celebrate your greys with artful colour placement.' },
+      { id: 'c1', name: 'Signature Balayage', time: '4 hours', price: '$295', desc: 'Hand-painted highlights for a sun-kissed, dimensional glow.' },
+      { id: 'c2', name: 'Luxe Full Colour', time: '2 hours', price: '$165', desc: 'Rich, uniform pigment application using ammonia-free formulas.' },
+      { id: 'c3', name: 'Platinum Restoration', time: '6 hours', price: '$450', desc: 'Ultimate blonde transformation with dual-stage lifting.' },
+      { id: 'c4', name: 'Gloss Refresh', time: '45 min', price: '$75', desc: 'Semi-permanent toner to neutralise brassiness and seal shine.' }
     ]
   },
   {
     id: 'nails',
-    label: 'Nail Services & Art',
+    label: 'Nail Artistry',
     icon: '❋',
-    gradient: 'linear-gradient(135deg, #0a1408 0%, #162412 100%)',
     accent: '#7EC8A4',
-    intro: 'Nail artistry elevated to fine jewellery. Our nail technicians are designers first.',
+    image: nailsImg,
+    intro: 'Wearable jewellery through avant-garde design.',
     services: [
-      { name: 'Classic Manicure', time: '45 min', price: 'From $45', desc: 'Shape, cuticle care, massage, and your choice of polish.' },
-      { name: 'Gel Manicure', time: '60 min', price: 'From $65', desc: 'Up to 3 weeks of chip-free wear with a high-shine finish.' },
-      { name: 'Sculpted Acrylics', time: '90 min', price: 'From $95', desc: 'Custom length and shape with a natural-looking finish.' },
-      { name: 'Nail Art Studio', time: '90–180 min', price: 'From $120', desc: 'Bespoke nail art: press-ons, 3D elements, fine-line details, foil.' },
-      { name: 'Pedicure Ritual', time: '75 min', price: 'From $80', desc: 'A full foot treatment with exfoliation, mask, massage, and colour.' },
-      { name: 'Bridal Nail Package', time: '3 hours', price: 'From $250', desc: 'Hands and feet, custom design, trail run, and wedding-day appointment.' },
+      { id: 'n1', name: 'Sculpted Extensions', time: '2 hours', price: '$130', desc: 'Extraordinarily durable extensions sculpted by hand with premium hard gel.' },
+      { id: 'n2', name: 'Apothecary Mani', time: '75 min', price: '$85', desc: 'Organic herb soak, sea salt exfoliation, and targeted hydration treatment.' },
+      { id: 'n3', name: 'Fine Line Artistry', time: '3 hours', price: '$180', desc: 'Intricate hand-painted patterns, gold leaf detailing, and 3D elements.' },
+      { id: 'n4', name: 'The Gel Overlay', time: '60 min', price: '$75', desc: 'Reinforced strength for natural nails with a high-gloss finish.' }
     ]
   },
   {
     id: 'beauty',
-    label: 'Beauty Treatments',
+    label: 'Skin & Lashes',
     icon: '⬡',
-    gradient: 'linear-gradient(135deg, #1a0808 0%, #2d1010 100%)',
     accent: '#E8A0A0',
-    intro: 'Skin, lashes, brows — the fine details that complete the picture. Our aestheticians work with surgical precision.',
+    image: beautyImg,
+    intro: 'Surgical precision meets holistic wellness.',
     services: [
-      { name: 'Signature Facial', time: '75 min', price: 'From $135', desc: 'Cleanse, exfoliate, custom masque, and targeted serums for your skin type.' },
-      { name: 'Lash Lift & Tint', time: '60 min', price: 'From $90', desc: '6–8 weeks of lifted, darkened lashes without extensions.' },
-      { name: 'Lash Extensions', time: '90–120 min', price: 'From $185', desc: 'Classic, hybrid, or volume sets tailored to your eye shape.' },
-      { name: 'Brow Architecture', time: '45 min', price: 'From $75', desc: 'Design, tint, and shape. A structured brow that frames the face.' },
-      { name: 'Microblading', time: '2.5 hours', price: 'From $550', desc: 'Semi-permanent hair-stroke brows. Includes a 6-week touch-up.' },
-      { name: 'Waxing & Threading', time: '15–45 min', price: 'From $25', desc: 'Precision hair removal for face and body. Quick and immaculate.' },
+      { id: 'b1', name: 'Cryo-Glow Facial', time: '90 min', price: '$195', desc: 'Sculpting cold therapy combined with high-potency Vitamin C.' },
+      { id: 'b2', name: 'Silk Lash Set', time: '2.5 hours', price: '$210', desc: 'Individual silk extensions applied strand-by-strand for dramatic volume.' },
+      { id: 'b3', name: 'Brow Architecture', time: '45 min', price: '$85', desc: 'Custom mapping, bespoke tinting, and precision shaping.' },
+      { id: 'b4', name: 'Lash Lift & Tint', time: '60 min', price: '$115', desc: 'A chemical lift that curls your natural lashes from the root.' }
     ]
-  },
-  {
-    id: 'makeup',
-    label: 'Makeup & Bridal',
-    icon: '✧',
-    gradient: 'linear-gradient(135deg, #0a0a1a 0%, #14142e 100%)',
-    accent: '#A0A8E8',
-    intro: 'Makeup that photographs like art and wears like a second skin. Bridal is our passion.',
-    services: [
-      { name: 'Event Makeup', time: '60 min', price: 'From $95', desc: 'Red carpet-ready looks for galas, parties, and special occasions.' },
-      { name: 'Bridal Trial', time: '2 hours', price: 'From $180', desc: 'A full trial run with photos to lock in your wedding day look.' },
-      { name: 'Bridal Makeup', time: '90 min', price: 'From $350', desc: 'On-the-day application with a dedicated artist and touch-up kit.' },
-      { name: 'Bridal Party Package', time: 'Full day', price: 'From $1,200', desc: 'Bride + up to 5 attendants. Includes champagne service and coordination.' },
-      { name: 'Airbrush Makeup', time: '75 min', price: 'From $145', desc: 'Featherweight, camera-ready finish. Lasts all day, transfers nothing.' },
-      { name: 'Makeup Lesson', time: '90 min', price: 'From $165', desc: 'One-on-one technique session with a personalised product guide.' },
-    ]
-  },
-  {
-    id: 'packages',
-    label: 'Studio Packages',
-    icon: '◎',
-    gradient: 'linear-gradient(135deg, #0d0808 0%, #1a1210 100%)',
-    accent: '#C9A96E',
-    intro: 'Full-day experiences curated for total transformation. Arrive as yourself; leave as your best self.',
-    services: [
-      { name: 'The Essentials', time: '3 hours', price: '$295', desc: 'Cut + Blowout + Brow Architecture. The perfect monthly reset.' },
-      { name: 'The Refresh', time: '4 hours', price: '$420', desc: 'Colour Gloss + Blowout + Manicure. Bright, polished, and ready.' },
-      { name: 'The Signature Day', time: '6 hours', price: '$680', desc: 'Balayage + Cut + Facial + Manicure. Our most popular full experience.' },
-      { name: 'The Bridal Journey', time: 'Full day', price: 'From $1,400', desc: 'Hair colour, cut, blowout, full makeup, nails, and lash treatment.' },
-      { name: 'The Luxe Retreat', time: '8 hours', price: '$1,200', desc: 'Everything. A completely bespoke day designed around you.' },
-      { name: 'Corporate Group', time: 'Half day', price: 'On request', desc: 'For teams, launches, and events. Minimum 6 guests. Full planning included.' },
-    ]
-  },
+  }
 ]
 
-function ServiceCard({ service, accent }) {
+function ServiceDetailModal({ service, accent, onClose }) {
+  const navigate = useNavigate();
+
+  const handleDelayedNav = (e, path) => {
+    e.preventDefault();
+    onClose();
+    setTimeout(() => navigate(path), 700);
+  };
+
   return (
-    <div className="srv-card">
-      <div className="srv-card-header">
-        <span className="srv-card-name">{service.name}</span>
-        <span className="srv-card-price" style={{ color: accent }}>{service.price}</span>
+    <motion.div
+      className="srv-modal-backdrop"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <div className="srv-modal-perspective">
+        <motion.div
+          className="srv-physical-card"
+          initial={{ rotateY: -180, rotateX: 30, scale: 0.4, y: 300, opacity: 0 }}
+          animate={{ rotateY: 0, rotateX: 0, scale: 1, y: 0, opacity: 1 }}
+          exit={{ rotateY: 180, rotateX: -30, scale: 0.4, y: 300, opacity: 0 }}
+          transition={{ type: "spring", damping: 20, stiffness: 100, mass: 1.5 }}
+          onClick={e => e.stopPropagation()}
+          style={{ '--accent': accent }}
+        >
+          <div className="card-face">
+            <button className="card-close-btn" onClick={onClose}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            <div className="card-content-layout">
+              <div className="card-side-header">
+                <div className="card-id">Ritual No. {service.id.toUpperCase()}</div>
+                <h2 className="card-title t-display">{service.name}</h2>
+                <div className="card-price-display">
+                  <span className="curr">$</span>
+                  <span className="amt">{service.price.replace('$', '')}</span>
+                </div>
+              </div>
+
+              <div className="card-main-body">
+                <p className="card-description">{service.desc}</p>
+                <div className="card-specs-row">
+                  <div className="spec-item">
+                    <label>Duration</label>
+                    <span>{service.time}</span>
+                  </div>
+                  <div className="spec-item">
+                    <label>Tier</label>
+                    <span>Elite Ritual</span>
+                  </div>
+                </div>
+                <div className="card-actions-area">
+                  <button onClick={(e) => handleDelayedNav(e, '/booking')} className="btn btn-gold card-btn">Proceed to Booking</button>
+                  <button onClick={(e) => handleDelayedNav(e, '/contact')} className="btn btn-outline card-btn" style={{ marginTop: '12px' }}>Inquiry</button>
+                </div>
+              </div>
+            </div>
+            <div className="card-shimmer-light"></div>
+            <div className="card-bottom-glow" style={{ background: `radial-gradient(circle at center, ${accent}33, transparent 70%)` }}></div>
+          </div>
+        </motion.div>
       </div>
-      <p className="srv-card-desc">{service.desc}</p>
-      <div className="srv-card-footer">
-        <span className="srv-card-time">⏱ {service.time}</span>
-        <Link to="/booking" className="srv-book-link" style={{ color: accent }}>Book →</Link>
+    </motion.div>
+  )
+}
+
+function ServiceListItem({ service, accent, onClick }) {
+  return (
+    <motion.div
+      className="srv-list-item"
+      whileHover={{ y: -5, borderColor: accent, scale: 1.01 }}
+      onClick={() => onClick(service)}
+      style={{ '--accent': accent }}
+    >
+      <div className="sli-top">
+        <span className="sli-id">{service.id}</span>
+        <div className="sli-dot"></div>
       </div>
-    </div>
+      <h4 className="sli-name">{service.name}</h4>
+      <div className="sli-bottom">
+        <span className="sli-price">{service.price}</span>
+        <span className="sli-more">Discover →</span>
+      </div>
+      <div className="sli-hover-bg"></div>
+    </motion.div>
   )
 }
 
 export default function Services() {
-  const [active, setActive] = useState('hair-styling')
-  const cat = categories.find(c => c.id === active)
-  const tabsRef = useRef(null)
-  const tabsWrapRef = useRef(null)
-  const contentRef = useRef(null)
-  const shouldScrollToServices = useRef(false)
+  const [activeCat, setActiveCat] = useState(categories[0].id)
+  const [selectedService, setSelectedService] = useState(null)
+  const pageRef = useRef(null)
+  const horizontalRef = useRef(null)
+  const heroBgRef = useRef(null)
 
   useGSAP(() => {
-    gsap.fromTo('.srv-hero-title',
-      { y: 80, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1.2, ease: 'expo.out', delay: 0.2 }
-    )
-    gsap.fromTo('.srv-hero-sub',
-      { y: 40, opacity: 0 },
-      { y: 0, opacity: 1, duration: 1, ease: 'expo.out', delay: 0.5 }
-    )
-  }, [])
-
-  const scrollToServices = () => {
-    if (!contentRef.current) return
-    const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 72
-    const tabsH = tabsWrapRef.current?.offsetHeight || 0
-    const target = contentRef.current.getBoundingClientRect().top + window.scrollY - navH - tabsH + 1
-
-    window.scrollTo({
-      top: Math.max(target, 0),
-      behavior: 'smooth',
-    })
-  }
-
-  const scrollToServicesAfterLayout = () => {
-    requestAnimationFrame(() => {
-      requestAnimationFrame(scrollToServices)
-    })
-  }
-
-  useEffect(() => {
-    if (!shouldScrollToServices.current) return
-    shouldScrollToServices.current = false
-    scrollToServicesAfterLayout()
-  }, [active])
-
-  const handleTabChange = (id) => {
-    shouldScrollToServices.current = true
-
-    if (id === active) {
-      scrollToServicesAfterLayout()
-      return
-    }
-
-    gsap.to(contentRef.current, {
-      opacity: 0, y: 18, duration: 0.24, ease: 'power2.inOut',
-      onComplete: () => {
-        setActive(id)
-        gsap.fromTo(contentRef.current,
-          { opacity: 0, y: 18 },
-          { opacity: 1, y: 0, duration: 0.46, ease: 'power3.out' }
-        )
+    // 1. Hero Reveal Parallax (Scroll Driven)
+    gsap.to(heroBgRef.current, {
+      yPercent: 30,
+      scale: 1.2,
+      rotateX: 10,
+      scrollTrigger: {
+        trigger: '.srv-hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
       }
-    })
+    });
+
+    gsap.to('.srv-hero-content', {
+      yPercent: -50,
+      opacity: 0,
+      scrollTrigger: {
+        trigger: '.srv-hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+
+    // 2. Horizontal Scroll Section with 3D Depth
+    const sections = gsap.utils.toArray('.srv-cat-section');
+    const scrollTween = gsap.to(sections, {
+      xPercent: -100 * (sections.length - 1),
+      ease: 'none',
+      scrollTrigger: {
+        trigger: horizontalRef.current,
+        pin: true,
+        scrub: 1,
+        snap: 1 / (sections.length - 1),
+        end: () => `+=${horizontalRef.current.offsetWidth * 3}`, // Longer scroll for smoother feel
+        onUpdate: (self) => {
+          const index = Math.round(self.progress * (sections.length - 1));
+          if (categories[index]) setActiveCat(categories[index].id);
+        }
+      }
+    });
+
+    // 3. Deep 3D Parallax for Backgrounds and Content while Scrolling
+    sections.forEach((section, i) => {
+      const img = section.querySelector('.srv-cat-img');
+      const info = section.querySelector('.srv-cat-info');
+      const listPanel = section.querySelector('.srv-cat-list-panel');
+
+      // Cinematic 3D Lens Zoom (No horizontal slide)
+      gsap.fromTo(img,
+        {
+          scale: 1.8,
+          rotateY: -15,
+          rotateX: 10,
+          z: -200,
+          opacity: 0.2
+        },
+        {
+          scale: 1,
+          rotateY: 15,
+          rotateX: -10,
+          z: 0,
+          opacity: 0.5,
+          scrollTrigger: {
+            trigger: section,
+            containerAnimation: scrollTween,
+            start: 'left right',
+            end: 'right left',
+            scrub: true
+          }
+        }
+      );
+
+      // Content Floating Entry
+      gsap.from(info, {
+        opacity: 0,
+        x: -100,
+        rotateY: -45,
+        scale: 0.9,
+        scrollTrigger: {
+          trigger: section,
+          containerAnimation: scrollTween,
+          start: 'left 80%',
+          end: 'left 20%',
+          scrub: 0.5
+        }
+      });
+
+      // List Panel Slide and Rise
+      gsap.from(listPanel, {
+        opacity: 0,
+        y: 100,
+        rotateX: -20,
+        z: -100,
+        scrollTrigger: {
+          trigger: section,
+          containerAnimation: scrollTween,
+          start: 'left 80%',
+          end: 'left 20%',
+          scrub: 0.5
+        }
+      });
+    });
+
+    // 4. Smooth Section Skew during scroll
+    let proxy = { skew: 0 },
+        skewSetter = gsap.quickSetter(".srv-cat-layout", "skewX", "deg"),
+        clamp = gsap.utils.clamp(-5, 5);
+
+    ScrollTrigger.create({
+      onUpdate: (self) => {
+        let skew = clamp(self.getVelocity() / -300);
+        if (Math.abs(skew) > Math.abs(proxy.skew)) {
+          proxy.skew = skew;
+          gsap.to(proxy, {skew: 0, duration: 0.8, ease: "power3", overwrite: true, onUpdate: () => skewSetter(proxy.skew)});
+        }
+      }
+    });
+
+  }, { scope: pageRef });
+
+  const scrollToCategory = (id) => {
+    const index = categories.findIndex(c => c.id === id);
+    const scrollST = ScrollTrigger.getAll().find(st => st.vars.trigger === horizontalRef.current);
+    if (scrollST) {
+      const target = scrollST.start + (scrollST.end - scrollST.start) * (index / (categories.length - 1));
+      window.scrollTo({ top: target, behavior: 'smooth' });
+    }
   }
 
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* Hero */}
-      <section className="page-hero" style={{ background: 'linear-gradient(180deg, #0a0010 0%, #000 60%)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <span className="t-label t-gold-em srv-hero-title" style={{ marginBottom: 20, display: 'block' }}>What We Do</span>
-          <h1 className="t-hero srv-hero-title">Every Service,<br />A Masterpiece.</h1>
-          <p className="t-body-lg srv-hero-sub" style={{ maxWidth: 520, margin: '28px auto 0', color: 'var(--text-2)' }}>
-            Six categories of premium beauty services. Each one designed to make you feel extraordinary.
-          </p>
+    <motion.div ref={pageRef} className="premium-services-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+
+      {/* 0. 3D Parallax Hero */}
+      <section className="srv-hero" style={{ perspective: '2000px' }}>
+        <div
+          ref={heroBgRef}
+          className="srv-hero-bg"
+          style={{
+            backgroundImage: `url('${servHero}')`,
+            transformStyle: 'preserve-3d',
+            willChange: 'transform'
+          }}
+        ></div>
+        <div className="srv-hero-overlay"></div>
+        <div className="container srv-hero-content">
+          <span className="t-label t-gold-em" style={{ fontSize: '13px', letterSpacing: '0.6em', marginBottom: '20px', display: 'block' }}>Architectural Beauty</span>
+          <h1 className="t-display" style={{ fontSize: 'clamp(50px, 12vw, 150px)', lineHeight: 0.8 }}>Services <span className="t-gold-em">&</span> Rituals</h1>
+          <p className="t-body-lg" style={{ marginTop: '40px', maxWidth: '650px', margin: '40px auto 0', opacity: 0.7 }}>A curated journey of self-preservation. Move through our chapters of excellence.</p>
+
+          <div className="srv-hero-scroll-cue">
+            <div className="scroll-line"></div>
+            <span>Scroll Rituals</span>
+          </div>
         </div>
       </section>
 
-      {/* Category tabs */}
-      <div ref={tabsWrapRef} className="srv-tabs-wrap" style={{ background: 'var(--near-black)', borderBottom: '1px solid var(--border)' }}>
-        <div className="container">
-          <div ref={tabsRef} className="srv-tabs">
-            {categories.map(c => (
-              <button
-                key={c.id}
-                data-srv-tab={c.id}
-                className={`srv-tab${active === c.id ? ' active' : ''}`}
-                onClick={() => handleTabChange(c.id)}
-                style={{ '--tab-accent': c.accent }}
-              >
-                <span className="srv-tab-icon">{c.icon}</span>
-                <span className="srv-tab-label">{c.label}</span>
-              </button>
-            ))}
-          </div>
+      {/* 1. Atelier Luxury Sidebar Nav (Always Open & Innovative Highlight) */}
+      <nav className="srv-atelier-nav">
+        <div className="nav-indicator-track">
+          <motion.div
+            className="nav-active-blob"
+            animate={{
+              y: categories.findIndex(c => c.id === activeCat) * 76,
+              backgroundColor: categories.find(c => c.id === activeCat)?.accent
+            }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
+        </div>
+        {categories.map((c, index) => (
+          <button
+            key={c.id}
+            className={`san-btn ${activeCat === c.id ? 'active' : ''}`}
+            onClick={() => scrollToCategory(c.id)}
+            style={{ '--accent': c.accent }}
+          >
+            <div className="san-icon-box">
+              <span className="san-icon">{c.icon}</span>
+            </div>
+            <div className="san-label-box">
+              <span className="san-label">{c.label}</span>
+              <div className="san-progress-bar">
+                <motion.div
+                  className="san-progress-fill"
+                  animate={{ scaleX: activeCat === c.id ? 1 : 0 }}
+                  style={{ background: c.accent }}
+                />
+              </div>
+            </div>
+          </button>
+        ))}
+      </nav>
+
+      {/* 2. Main Horizontal Scroll Gallery */}
+      <div ref={horizontalRef} className="srv-horizontal-wrap">
+        {/* Left Arrow - Positioned to not overlap sidebar */}
+        <button
+          className="srv-nav-arrow srv-nav-prev"
+          onClick={() => {
+            const index = categories.findIndex(c => c.id === activeCat);
+            if (index > 0) scrollToCategory(categories[index - 1].id);
+          }}
+          disabled={activeCat === categories[0].id}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
+        {/* Right Arrow */}
+        <button
+          className="srv-nav-arrow srv-nav-next"
+          onClick={() => {
+            const index = categories.findIndex(c => c.id === activeCat);
+            if (index < categories.length - 1) scrollToCategory(categories[index + 1].id);
+          }}
+          disabled={activeCat === categories[categories.length - 1].id}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+
+        <div className="srv-track">
+          {categories.map((cat) => (
+            <section key={cat.id} className="srv-cat-section" style={{ perspective: '2500px' }}>
+              <div className="srv-cat-layout" style={{ transformStyle: 'preserve-3d' }}>
+                {/* 3D Visual Block */}
+                <div className="srv-cat-visual" style={{ transformStyle: 'preserve-3d' }}>
+                  <div className="srv-cat-img-wrap" style={{ transformStyle: 'preserve-3d' }}>
+                    <img src={cat.image} alt={cat.label} className="srv-cat-img" />
+                    <div className="srv-cat-img-overlay"></div>
+                    <div className="srv-cat-ambient-light" style={{ background: `radial-gradient(circle at 30% 30%, ${cat.accent}22, transparent 60%)` }}></div>
+                  </div>
+                  <div className="srv-cat-info" style={{ transformStyle: 'preserve-3d' }}>
+                    <span className="t-label" style={{ color: cat.accent, marginBottom: '24px', display: 'block', fontSize: '11px', letterSpacing: '0.3em' }}>Atelier Selection</span>
+                    <h2 className="t-hero" style={{ fontSize: 'clamp(40px, 8vw, 110px)', lineHeight: 0.85 }}>{cat.label.split(' ')[0]} <br/> <span className="t-gold-em">Curation</span></h2>
+                  </div>
+                </div>
+
+                {/* Vertical Scroll List of Services */}
+                <div className="srv-cat-list-panel">
+                  <div className="srv-list-scrollable">
+                    <div className="srv-items-flex">
+                      {cat.services.map(s => (
+                        <ServiceListItem
+                          key={s.id}
+                          service={s}
+                          accent={cat.accent}
+                          onClick={(srv) => setSelectedService({ ...srv, accent: cat.accent })}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ))}
         </div>
       </div>
 
-      {/* Content */}
-      <section ref={contentRef} className="srv-content" style={{ background: cat.gradient, minHeight: '60vh', padding: '80px 0 120px' }}>
-        <div className="container">
-          <div className="srv-intro">
-            <span className="t-label" style={{ color: cat.accent, marginBottom: 12, display: 'block' }}>{cat.label}</span>
-            <p className="t-body-lg" style={{ color: 'rgba(255,255,255,0.75)', maxWidth: 600 }}>{cat.intro}</p>
-          </div>
-          <div className="srv-cards-grid">
-            {cat.services.map(s => (
-              <ServiceCard key={s.name} service={s} accent={cat.accent} />
-            ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: 64 }}>
-            <Link to="/pricing" className="btn btn-outline" style={{ marginRight: 16 }}>See Full Pricing</Link>
-            <Link to="/booking" className="btn btn-gold">Book This Service</Link>
-          </div>
-        </div>
-      </section>
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {selectedService && (
+          <ServiceDetailModal
+            service={selectedService}
+            accent={selectedService.accent}
+            onClose={() => setSelectedService(null)}
+          />
+        )}
+      </AnimatePresence>
 
-      {/* Process */}
-      <section style={{ background: 'var(--black)', padding: '120px 0' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: 72 }}>
-            <span className="t-label t-gold-em" style={{ marginBottom: 16, display: 'block' }}>How It Works</span>
-            <h2 className="t-display">The Glamore Process</h2>
-          </div>
-          <div className="process-steps">
-            {[
-              { step: '01', title: 'Consultation', body: 'Every visit begins with a conversation — your goals, lifestyle, and inspiration images.' },
-              { step: '02', title: 'Personalisation', body: 'We build a custom plan around you. No formulas, no shortcuts.' },
-              { step: '03', title: 'Artistry', body: 'Our team executes with precision, care, and creativity. You\'re in expert hands.' },
-              { step: '04', title: 'Aftercare', body: 'Product recommendations, maintenance schedule, and open communication between visits.' },
-            ].map(({ step, title, body }) => (
-              <div key={step} className="process-step">
-                <div className="process-step-num t-gold-em">{step}</div>
-                <h3 className="t-title" style={{ margin: '16px 0 10px' }}>{title}</h3>
-                <p style={{ color: 'var(--text-3)', lineHeight: 1.8 }}>{body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </motion.main>
+      <style>{`
+        .premium-services-page { background: #000; overflow-x: hidden; }
+
+        /* Hero Section */
+        .srv-hero { height: 100vh; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; text-align: center; }
+        .srv-hero-bg { position: absolute; inset: -20%; background-size: cover; background-position: center; filter: brightness(0.4) saturate(1.2); }
+        .srv-hero-overlay { position: absolute; inset: 0; background: radial-gradient(circle at center, transparent 0%, #000 100%); z-index: 1; }
+        .srv-hero-content { position: relative; z-index: 2; transform-style: preserve-3d; }
+        .srv-hero-scroll-cue { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 15px; opacity: 0.4; }
+        .scroll-line { width: 1px; height: 60px; background: linear-gradient(to bottom, var(--gold), transparent); animation: scroll-line-anim 2s infinite; }
+        @keyframes scroll-line-anim { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 50.1% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+        .srv-hero-scroll-cue span { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3em; color: #fff; }
+
+        /* Atelier Sidebar Nav (Always Open) */
+        .srv-atelier-nav {
+          position: fixed; top: 50%; left: 30px; transform: translateY(-50%);
+          display: flex; flex-direction: column; gap: 12px; z-index: 150;
+          padding: 24px; border-radius: 30px;
+          background: rgba(0,0,0,0.3); backdrop-filter: blur(20px);
+          border: 1px solid rgba(255,255,255,0.05);
+          width: 260px;
+        }
+        .nav-indicator-track { position: absolute; left: 18px; top: 34px; bottom: 34px; width: 1px; background: rgba(255,255,255,0.05); }
+        .nav-active-blob {
+          position: absolute; left: -10px; top: 0; width: 44px; height: 44px;
+          border-radius: 50%; filter: blur(20px); opacity: 0.4; z-index: 0;
+        }
+
+        .san-btn {
+          background: none; border: none; display: flex; align-items: center;
+          gap: 20px; cursor: pointer; padding: 12px 0; width: 100%;
+          position: relative; z-index: 1; transition: all 0.4s ease;
+        }
+        .san-icon-box {
+          width: 40px; height: 40px; border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.4); transition: all 0.4s ease;
+          flex-shrink: 0;
+        }
+        .san-icon { font-size: 16px; }
+
+        .san-label-box { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+        .san-label {
+          font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em;
+          color: rgba(255,255,255,0.4); font-weight: 700; transition: all 0.4s ease;
+        }
+        .san-progress-bar { width: 120px; height: 1px; background: rgba(255,255,255,0.05); position: relative; }
+        .san-progress-fill { position: absolute; inset: 0; transform-origin: left; }
+
+        .san-btn:hover .san-icon-box { border-color: rgba(255,255,255,0.2); color: #fff; }
+        .san-btn:hover .san-label { color: #fff; }
+
+        .san-btn.active .san-icon-box {
+          background: var(--accent); border-color: var(--accent); color: #000;
+          box-shadow: 0 0 20px color-mix(in srgb, var(--accent) 40%, transparent);
+          transform: scale(1.1);
+        }
+        .san-btn.active .san-label { color: #fff; letter-spacing: 0.25em; }
+
+        /* Navigation Arrows (Cleared from Sidebar) */
+        .srv-nav-arrow {
+          position: absolute; top: 50%; transform: translateY(-50%); z-index: 101;
+          width: 60px; height: 60px; border-radius: 50%; background: rgba(0,0,0,0.5);
+          border: 1px solid rgba(255,255,255,0.15); color: #fff; cursor: pointer;
+          display: flex; align-items: center; justify-content: center; transition: all 0.4s ease;
+          backdrop-filter: blur(15px);
+        }
+        .srv-nav-arrow:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: var(--gold); color: var(--gold); transform: translateY(-50%) scale(1.1); }
+        .srv-nav-arrow:disabled { opacity: 0; pointer-events: none; }
+        .srv-nav-prev { left: 320px; } /* Clears the wide sidebar */
+        .srv-nav-next { right: 40px; }
+
+        /* Gallery Sections */
+        .srv-horizontal-wrap { height: 100vh; width: 100%; position: relative; }
+        .srv-track { display: flex; height: 100vh; }
+        .srv-cat-section { width: 100vw; height: 100vh; flex-shrink: 0; overflow: hidden; }
+        .srv-cat-layout { display: grid; grid-template-columns: 0.85fr 1.15fr; height: 100vh; will-change: transform; }
+        .srv-cat-visual { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; padding: 10% 10% 10% 320px; transform-style: preserve-3d; }
+        .srv-cat-img-wrap { position: absolute; inset: 0; z-index: 0; overflow: hidden; transform: translateZ(-200px); }
+        .srv-cat-img { width: 120%; height: 120%; object-fit: cover; opacity: 0.45; position: absolute; top: -10%; left: -10%; will-change: transform; }
+        .srv-cat-img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, #000 0%, transparent 60%), linear-gradient(to right, transparent 50%, #000 100%); }
+        .srv-cat-ambient-light { position: absolute; inset: 0; z-index: 1; opacity: 0.5; pointer-events: none; }
+        .srv-cat-info { position: relative; z-index: 2; transform: translateZ(100px); will-change: transform, opacity; }
+
+        .srv-cat-list-panel { background: #000; height: 100vh; padding: 120px 10% 100px 4%; display: flex; flex-direction: column; justify-content: center; transform-style: preserve-3d; will-change: transform, opacity; }
+        .srv-list-scrollable { overflow-y: auto; padding: 20px 20px 20px 0; scrollbar-width: none; }
+        .srv-list-scrollable::-webkit-scrollbar { display: none; }
+        .srv-items-flex { display: flex; flex-direction: column; gap: 20px; }
+
+        /* List Item Card */
+        .srv-list-item {
+          position: relative; background: linear-gradient(135deg, #0a0a0a, #050505); border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 4px; padding: 28px 36px; cursor: pointer; border-left: 2px solid var(--accent);
+          transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .sli-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .sli-id { font-size: 8px; text-transform: uppercase; letter-spacing: 0.3em; color: rgba(255,255,255,0.3); font-weight: 800; }
+        .sli-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+        .sli-name { font-family: var(--font-display); font-size: 26px; color: #fff; line-height: 1.1; margin-bottom: 16px; }
+        .sli-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+        .sli-price { font-family: var(--font-display); font-size: 22px; color: var(--accent); font-style: italic; }
+        .sli-more { font-size: 9px; text-transform: uppercase; color: rgba(255,255,255,0.2); letter-spacing: 0.15em; }
+        .sli-hover-bg { position: absolute; inset: 0; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent); opacity: 0; transition: opacity 0.5s; }
+        .srv-list-item:hover .sli-hover-bg { opacity: 1; }
+
+        /* Modal Card */
+        .srv-modal-backdrop { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; padding: 40px; }
+        .srv-modal-perspective { width: 100%; max-width: 960px; perspective: 2500px; }
+        .srv-physical-card {
+          width: 100%; min-height: 600px;
+          background: rgba(12, 12, 12, 0.4);
+          backdrop-filter: blur(50px) saturate(200%);
+          -webkit-backdrop-filter: blur(50px) saturate(200%);
+          border: 1px solid rgba(255,255,255,0.15);
+          position: relative; border-radius: 12px; transform-style: preserve-3d;
+          box-shadow: 0 50px 150px rgba(0,0,0,0.8), inset 0 0 60px rgba(255,255,255,0.02);
+        }
+        .card-face { position: relative; width: 100%; height: 100%; padding: 80px 100px; backface-visibility: hidden; z-index: 10; border: 1px solid rgba(255,255,255,0.04); margin: 15px; border-radius: 8px; }
+        .card-close-btn { position: absolute; top: 40px; right: 40px; background: none; border: none; color: #fff; opacity: 0.4; cursor: pointer; transition: 0.3s; }
+        .card-close-btn:hover { opacity: 1; transform: scale(1.1) rotate(90deg); }
+
+        .card-content-layout { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; }
+        .card-id { font-size: 10px; text-transform: uppercase; letter-spacing: 0.6em; color: var(--accent); font-weight: 800; margin-bottom: 15px; }
+        .card-title { font-size: clamp(34px, 6vw, 72px); line-height: 0.9; margin: 0; color: #fff; letter-spacing: -0.01em; }
+        .card-price-display { display: flex; align-items: flex-start; gap: 6px; margin-top: 40px; }
+        .card-price-display .curr { font-size: 22px; color: var(--accent); margin-top: 12px; font-weight: 600; }
+        .card-price-display .amt { font-family: var(--font-display); font-size: 96px; line-height: 0.85; font-style: italic; color: #fff; }
+
+        .card-description { font-size: 19px; color: rgba(255,255,255,0.65); line-height: 1.8; margin-bottom: 40px; }
+        .card-specs-row { display: flex; gap: 60px; padding-top: 40px; border-top: 1px solid rgba(255,255,255,0.08); margin-bottom: 40px; }
+        .spec-item label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.3em; color: rgba(255,255,255,0.4); margin-bottom: 12px; font-weight: 800; }
+        .spec-item span { font-family: var(--font-display); font-size: 28px; color: #fff; }
+        .card-actions-area { display: flex; flex-direction: column; gap: 14px; }
+        .card-btn { width: 100%; padding: 22px 0; font-size: 13px; letter-spacing: 0.2em; font-weight: 700; border-radius: 4px; }
+
+        .card-shimmer-light { position: absolute; inset: 0; background: linear-gradient(135deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%); pointer-events: none; border-radius: inherit; }
+        .card-bottom-glow { position: absolute; bottom: -80px; left: 0; right: 0; height: 160px; filter: blur(60px); pointer-events: none; opacity: 0.5; }
+
+        @media (max-width: 1100px) {
+          .srv-atelier-nav { display: none; }
+          .srv-nav-prev { left: 40px; }
+          .srv-cat-layout { grid-template-columns: 1fr; }
+          .srv-cat-visual { height: 40vh; padding-left: 10%; }
+          .srv-cat-list-panel { height: auto; padding: 40px 24px 100px; }
+          .srv-track { flex-direction: column; height: auto; width: 100% !important; }
+        }
+      `}</style>
+    </motion.div>
   )
 }
