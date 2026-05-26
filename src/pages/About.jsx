@@ -51,7 +51,14 @@ function TimelineItem({ year, title, body, index }) {
         scrollTrigger: {
           trigger: itemRef.current,
           start: 'top 80%',
-          toggleActions: 'play none none reverse'
+          toggleActions: 'play none none reverse',
+          onToggle: (self) => {
+            if (self.isActive) {
+              itemRef.current.classList.add('is-active')
+            } else {
+              itemRef.current.classList.remove('is-active')
+            }
+          }
         }
       }
     );
@@ -60,7 +67,7 @@ function TimelineItem({ year, title, body, index }) {
     gsap.fromTo(yearRef.current,
       { y: 100, opacity: 0 },
       {
-        y: -100, opacity: 0.1,
+        y: -100, opacity: 0.04,
         scrollTrigger: {
           trigger: itemRef.current,
           start: 'top bottom',
@@ -74,18 +81,13 @@ function TimelineItem({ year, title, body, index }) {
   return (
     <div ref={itemRef} className={`about-journey-item ${index % 2 === 0 ? 'left' : 'right'}`}>
       <div ref={yearRef} className="about-journey-year-bg">{year}</div>
-
-      <div ref={contentRef} className="about-journey-card">
-        <div className="card-edge-highlight" />
-        <div className="about-journey-content">
-          <div className="journey-node-tag">
-             <span className="journey-node-dot" />
-             <span className="journey-node-year">{year}</span>
-          </div>
-          <h3 className="t-headline">{title}</h3>
-          <p className="t-body">{body}</p>
+      <div className="journey-center-node" />
+      <div className="about-journey-card-wrap">
+        <div ref={contentRef} className="about-journey-card">
+          <span className="journey-card-year">{year}</span>
+          <h3>{title}</h3>
+          <p>{body}</p>
         </div>
-        <div className="testimonial-card-glow" />
       </div>
     </div>
   )
@@ -140,6 +142,68 @@ export default function About() {
     });
 
     // 2. Vision Section Reveal
+    gsap.fromTo('.about-vision-eyebrow',
+      { opacity: 0, x: -15 },
+      {
+        opacity: 1, x: 0,
+        duration: 1,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '.about-sentence-copy',
+          start: 'top 85%',
+        }
+      }
+    );
+
+    gsap.fromTo('.about-sentence-copy h2 .reveal-line-inner',
+      { yPercent: 100, rotate: 3 },
+      {
+        yPercent: 0, rotate: 0,
+        duration: 1.4,
+        stagger: 0.15,
+        ease: 'power4.out',
+        scrollTrigger: {
+          trigger: '.about-sentence-copy h2',
+          start: 'top 85%',
+        }
+      }
+    );
+
+    gsap.fromTo('.about-sentence-copy p .reveal-para-span',
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1, y: 0,
+        duration: 1,
+        stagger: 0.2,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.about-sentence-copy p',
+          start: 'top 85%',
+        }
+      }
+    );
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: '.img-reveal-frame',
+        start: 'top 80%',
+      }
+    })
+    .to('.img-reveal-curtain', {
+      scaleX: 0,
+      duration: 1.5,
+      ease: 'power4.inOut'
+    })
+    .fromTo('.about-parallax-img',
+      { scale: 1.3 },
+      {
+        scale: 1.05,
+        duration: 1.8,
+        ease: 'power3.out'
+      },
+      0
+    );
+
     gsap.to('.about-parallax-img', {
       y: -80,
       scrollTrigger: {
@@ -232,20 +296,23 @@ export default function About() {
         <div className="container">
            <div className="grid-2" style={{ alignItems: 'center', gap: 'clamp(40px, 8vw, 120px)' }}>
               <div className="about-reveal about-sentence-copy">
-                <span className="home-eyebrow" style={{ display: 'block', marginBottom: '2rem' }}>The Vision</span>
+                <span className="home-eyebrow about-vision-eyebrow" style={{ display: 'block', marginBottom: '2rem' }}>The Vision</span>
                 <h2 className="t-display">
-                  <span>Every ritual is a</span> <br/>
-                  <span>creative act of</span> <br/>
-                  <span><em className="t-gold">Personalisation.</em></span>
+                  <span className="reveal-line-wrap"><span className="reveal-line-inner">Every ritual is a</span></span> <br/>
+                  <span className="reveal-line-wrap"><span className="reveal-line-inner">creative act of</span></span> <br/>
+                  <span className="reveal-line-wrap"><span className="reveal-line-inner"><em className="t-gold">Personalisation.</em></span></span>
                 </h2>
-                <p className="t-body-lg" style={{ marginTop: '40px', color: 'rgba(255,255,255,0.6)' }}>
-                  <span>We believe beauty isn't a destination, but a language of self-respect.</span> <span>Our artists don't just apply colour or style hair;</span> <span>they translate your individuality into a visual signature.</span>
+                <p className="t-body-lg" style={{ marginTop: '40px', color: 'rgba(255,255,255,0.6)', lineHeight: 1.8 }}>
+                  <span className="reveal-para-span" style={{ display: 'block', marginBottom: '10px' }}>We believe beauty isn't a destination, but a language of self-respect.</span>
+                  <span className="reveal-para-span" style={{ display: 'block', marginBottom: '10px' }}>Our artists don't just apply colour or style hair;</span>
+                  <span className="reveal-para-span" style={{ display: 'block' }}>they translate your individuality into a visual signature.</span>
                 </p>
               </div>
               <div className="mission-visual">
                  <div className="img-reveal-frame">
+                    <div className="img-reveal-curtain" />
                     <img src={atelierImg} alt="Atelier" className="about-parallax-img" />
-                    <div className="story-image-overlay" style={{ transform: 'translate(-20px, -20px)' }} />
+                    <div className="story-image-overlay" style={{ zIndex: 3 }} />
                  </div>
               </div>
            </div>
@@ -314,6 +381,220 @@ export default function About() {
           <Link to="/booking" className="btn btn-gold">Reserve Your Session</Link>
         </div>
       </section>
+
+      <style>{`
+        .about-journey-section {
+          background: #050406;
+          position: relative;
+          z-index: 10;
+          overflow: hidden;
+        }
+        
+        /* Vision Section Reveal Styles */
+        .reveal-line-wrap {
+          display: inline-block;
+          overflow: hidden;
+          vertical-align: bottom;
+          padding-bottom: 0.1em;
+          margin-bottom: -0.1em;
+        }
+        .reveal-line-inner {
+          display: inline-block;
+        }
+        .reveal-para-span {
+          opacity: 0;
+        }
+        .img-reveal-frame {
+          position: relative;
+          overflow: hidden;
+          border-radius: 16px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+          aspect-ratio: 4/5;
+          width: 100%;
+        }
+        .img-reveal-curtain {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, #1c140f, #0d0806);
+          z-index: 2;
+          transform-origin: right;
+        }
+        .about-parallax-img {
+          width: 100%;
+          height: 120%;
+          object-fit: cover;
+          display: block;
+        }
+        
+        .about-journey-stack {
+          position: relative;
+          max-width: 1200px;
+          margin: 80px auto 0;
+          padding: 60px 0;
+        }
+        .journey-track {
+          position: absolute;
+          left: 50%;
+          top: 0;
+          bottom: 0;
+          width: 2px;
+          background: rgba(255, 255, 255, 0.04);
+          transform: translateX(-50%);
+          z-index: 1;
+        }
+        .journey-progress-line {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(to bottom, var(--gold-light), var(--gold), rgba(201, 169, 110, 0.05));
+          transform-origin: top;
+          transform: scaleY(0);
+          box-shadow: 0 0 12px var(--gold);
+        }
+        .about-journey-item {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 120px;
+          position: relative;
+          margin-bottom: 140px;
+          align-items: center;
+          min-height: 280px;
+          z-index: 2;
+        }
+        .about-journey-item:last-child {
+          margin-bottom: 0;
+        }
+        .about-journey-card-wrap {
+          width: 100%;
+          display: flex;
+          transform-style: preserve-3d;
+        }
+        .about-journey-item.left .about-journey-card-wrap {
+          grid-column: 1;
+          justify-content: flex-end;
+        }
+        .about-journey-item.right .about-journey-card-wrap {
+          grid-column: 2;
+          justify-content: flex-start;
+        }
+        .about-journey-card {
+          position: relative;
+          background: rgba(12, 10, 14, 0.45);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 20px;
+          padding: 44px 48px;
+          width: 100%;
+          max-width: 520px;
+          backdrop-filter: blur(20px);
+          -webkit-backdrop-filter: blur(20px);
+          box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+          transform-style: preserve-3d;
+          transition: border-color 0.5s, box-shadow 0.5s, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .about-journey-card:hover {
+          border-color: rgba(201, 169, 110, 0.35);
+          box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), 0 0 30px rgba(201, 169, 110, 0.08);
+          transform: translateY(-8px) scale(1.01);
+        }
+        .journey-card-year {
+          font-family: var(--font-accent);
+          font-style: italic;
+          font-size: 1.85rem;
+          color: var(--gold);
+          margin-bottom: 12px;
+          display: block;
+          font-weight: 500;
+        }
+        .about-journey-card h3 {
+          font-family: var(--font-display);
+          font-size: 2.1rem;
+          color: #fff;
+          line-height: 1.2;
+          margin: 0 0 16px;
+          letter-spacing: -0.01em;
+        }
+        .about-journey-card p {
+          font-size: 0.96rem;
+          color: rgba(255, 255, 255, 0.62);
+          line-height: 1.75;
+          margin: 0;
+        }
+        .journey-center-node {
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%) scale(1);
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #080709;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          z-index: 10;
+          transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 0 0 0px transparent;
+        }
+        .about-journey-item.is-active .journey-center-node {
+          border-color: var(--gold-light);
+          background: var(--gold);
+          box-shadow: 0 0 25px var(--gold), 0 0 0 8px rgba(201, 169, 110, 0.22);
+          transform: translate(-50%, -50%) scale(1.3);
+        }
+        .about-journey-year-bg {
+          position: absolute;
+          font-family: var(--font-display);
+          font-size: clamp(12rem, 20vw, 24rem);
+          font-weight: 700;
+          color: rgba(255, 255, 255, 0.015);
+          z-index: 0;
+          pointer-events: none;
+          line-height: 1;
+        }
+        .about-journey-item.left .about-journey-year-bg {
+          right: 4%;
+          top: 0;
+        }
+        .about-journey-item.right .about-journey-year-bg {
+          left: 4%;
+          top: 0;
+        }
+
+        /* Responsive timeline */
+        @media (max-width: 1024px) {
+          .journey-track {
+            left: 32px;
+            transform: none;
+          }
+          .about-journey-item {
+            grid-template-columns: 1fr;
+            gap: 0;
+            padding-left: 80px;
+            margin-bottom: 80px;
+          }
+          .about-journey-item.left .about-journey-card-wrap,
+          .about-journey-item.right .about-journey-card-wrap {
+            grid-column: 1;
+            justify-content: flex-start;
+          }
+          .journey-center-node {
+            left: 32px;
+            top: 48px;
+            transform: translate(-50%, -50%);
+          }
+          .about-journey-item.is-active .journey-center-node {
+            transform: translate(-50%, -50%) scale(1.3);
+          }
+          .about-journey-year-bg {
+            display: none;
+          }
+          .about-journey-card {
+            max-width: 100%;
+            padding: 36px;
+          }
+        }
+      `}</style>
     </motion.main>
   )
 }

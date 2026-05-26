@@ -545,6 +545,16 @@ export default function Home() {
   const serviceTrackRef = useRef(null)
   const testimonialsSectionRef = useRef(null)
   const testimonialsTrackRef = useRef(null)
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const [isTestimonialHovered, setIsTestimonialHovered] = useState(false)
+
+  useEffect(() => {
+    if (loading || isTestimonialHovered) return
+    const interval = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length)
+    }, 4500)
+    return () => clearInterval(interval)
+  }, [loading, isTestimonialHovered])
 
   // Preload hero assets while splash is showing
   useEffect(() => {
@@ -587,6 +597,44 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [loading])
 
+  const [activeIndex, setActiveIndex] = useState(1)
+
+  const handleTrackScroll = useCallback((e) => {
+    if (window.innerWidth >= 1025) return // handled by GSAP
+    const track = e.currentTarget
+    const cards = track.querySelectorAll('.home-horizontal-card')
+    const trackCenter = track.getBoundingClientRect().left + track.clientWidth / 2
+    let closestIndex = 0
+    let minDiff = Infinity
+    cards.forEach((card, idx) => {
+      const rect = card.getBoundingClientRect()
+      const cardCenter = rect.left + rect.width / 2
+      const diff = Math.abs(cardCenter - trackCenter)
+      if (diff < minDiff) {
+        minDiff = diff
+        closestIndex = idx
+      }
+    })
+    cards.forEach((card, idx) => {
+      if (idx === closestIndex) {
+        card.classList.add('is-active')
+      } else {
+        card.classList.remove('is-active')
+      }
+    })
+    setActiveIndex(closestIndex + 1)
+
+    // Update progress bar
+    const maxScroll = track.scrollWidth - track.clientWidth
+    if (maxScroll > 0) {
+      const progress = track.scrollLeft / maxScroll
+      const rail = document.querySelector('.home-service-rail i')
+      if (rail) {
+        rail.style.transform = `scaleX(${progress})`
+      }
+    }
+  }, [])
+
   useEffect(() => {
     if (loading) return
     const mm = gsap.matchMedia()
@@ -595,42 +643,87 @@ export default function Home() {
       const section = serviceSectionRef.current
       if (!track || !section) return
       const cards = gsap.utils.toArray('.home-horizontal-card')
-      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
-      const cardWidth = 32 * rem
-      const gap = 10 * rem
-      const distance = (cards.length * cardWidth) + ((cards.length - 1) * gap) - cardWidth
+      
+      const firstCard = cards[0]
+      const lastCard = cards[cards.length - 1]
+
+      const getXStart = () => window.innerWidth / 2 - (firstCard.offsetLeft + firstCard.offsetWidth / 2)
+      const getXEnd = () => window.innerWidth / 2 - (lastCard.offsetLeft + lastCard.offsetWidth / 2)
+      const getDistance = () => getXStart() - getXEnd()
+
+      // Set initial state for progress rail i
+      gsap.set('.home-service-rail i', { scaleX: 0, transformOrigin: 'left' })
+
       const mainTimeline = gsap.timeline({
         scrollTrigger: {
-          trigger: section, start: 'top top', end: () => `+=${distance * 1.5}`,
-          scrub: 1.2, pin: true, invalidateOnRefresh: true, anticipatePin: 1,
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${getDistance()}`,
+          scrub: 2, // Heavy weighted smooth momentum
+          pin: true,
+          invalidateOnRefresh: true,
+          anticipatePin: 1,
         }
       })
-      mainTimeline.to(track, { x: () => -distance, ease: 'none' })
+      
+      mainTimeline.fromTo(track, { x: () => getXStart() }, { x: () => getXEnd(), ease: 'none' })
+      
       cards.forEach((card, i) => {
         const inner = card.querySelector('img')
         const copy = card.querySelector('.home-horizontal-card-copy')
-        gsap.set(card, { transformPerspective: 2000 })
+        gsap.set(card, { transformPerspective: 1000 }) // Lower value creates a much more pronounced 3D effect
+        
+        // Visual distortion/scaling as card scrolls through screen
         ScrollTrigger.create({
-          trigger: card, containerAnimation: mainTimeline,
-          start: 'left right', end: 'right left', scrub: true,
+          trigger: card,
+          containerAnimation: mainTimeline,
+          start: 'left right',
+          end: 'right left',
+          scrub: true,
           onUpdate: (self) => {
             let dist = self.progress - 0.5
             if (i === cards.length - 1 && mainTimeline.scrollTrigger.progress > 0.98) dist = 0
             if (i === 0 && mainTimeline.scrollTrigger.progress < 0.02) dist = 0
             const absDist = Math.abs(dist)
             gsap.set(card, {
-              rotateY: dist * -60, z: -absDist * 300, scale: 1 - absDist * 0.3,
-              opacity: 1 - absDist, filter: `blur(${absDist * 8}px) brightness(${1 - absDist * 0.4})`,
+              rotateY: dist * -80, // Stronger 3D rotation
+              z: -absDist * 750,   // Deeper translation along the Z-axis for a high-end 3D tunnel focus
+              scale: 1 - absDist * 0.25, // Softened scaling down to keep cards prominent
+              opacity: 1 - absDist * 0.7,
+              filter: `blur(${absDist * 3.5}px) brightness(${1 - absDist * 0.35})`, // Clean, premium depth-of-field blur
               transformOrigin: dist > 0 ? 'left center' : 'right center'
             })
-            if (inner) gsap.set(inner, { x: dist * 100, scale: 1.1 + absDist * 0.1, rotateY: dist * 10 })
-            if (copy) gsap.set(copy, { z: 80, x: dist * -50, rotateY: dist * 8, opacity: 1 - absDist * 3 })
+            if (inner) gsap.set(inner, { x: dist * 160, scale: 1.15 + absDist * 0.15, rotateY: dist * 15 })
+            if (copy) gsap.set(copy, { z: 150, x: dist * -60, rotateY: dist * 10, opacity: 1 - absDist * 2.2 })
+          }
+        })
+
+        // Active state and index indicator tracking
+        ScrollTrigger.create({
+          trigger: card,
+          containerAnimation: mainTimeline,
+          start: 'left center',
+          end: 'right center',
+          onToggle: (self) => {
+            if (self.isActive) {
+              card.classList.add('is-active')
+              setActiveIndex(i + 1)
+            } else {
+              card.classList.remove('is-active')
+            }
           }
         })
       })
+
       gsap.to('.home-service-rail i', {
-        scaleX: 1, ease: 'none',
-        scrollTrigger: { trigger: section, start: 'top top', end: () => `+=${distance * 1.5}`, scrub: 1.2 }
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top top',
+          end: () => `+=${getDistance()}`,
+          scrub: 1.2
+        }
       })
     })
     return () => mm.revert()
@@ -646,67 +739,18 @@ export default function Home() {
 
   useEffect(() => {
     if (loading) return
-    const mm = gsap.matchMedia()
-    mm.add('(min-width: 1025px)', () => {
-      const section = testimonialsSectionRef.current
-      const cards = gsap.utils.toArray('.premium-testimonial-card')
-      if (!section || !cards.length) return
-
-      // 1. Initial Entrance (Fly in when section enters viewport)
-      gsap.fromTo(cards[0],
-        { y: 100, opacity: 0, rotateX: -20, scale: 0.9 },
-        {
-          y: 0, opacity: 1, rotateX: 0, scale: 1,
-          duration: 1.2, ease: 'power3.out', // Speed up from 1.5
-          scrollTrigger: {
-            trigger: section,
-            start: 'top 85%',
-            toggleActions: 'play none none reverse'
-          },
-          onComplete: () => cards[0].classList.add('is-active')
-        }
-      )
-
-      // 2. Main Stacking Timeline
-      const tl = gsap.timeline({
+    
+    // Entrance animation for testimonials section
+    gsap.fromTo('.testimonials-section .home-section-head, .testimonials-section .home-testimonial-stack',
+      { y: 50, opacity: 0 },
+      {
+        y: 0, opacity: 1, duration: 1.2, ease: 'power3.out', stagger: 0.15,
         scrollTrigger: {
-          trigger: section,
-          start: 'top top',
-          end: `+=${cards.length * 100}%`, // Reduced from 150%
-          pin: true,
-          scrub: 0.8,
-          invalidateOnRefresh: true,
+          trigger: '.testimonials-section',
+          start: 'top 80%',
         }
-      })
-
-      cards.forEach((card, i) => {
-        if (i === 0) return // Already handled by intro
-
-        // Subsequent cards slide up and stack
-        tl.fromTo(card,
-          { y: '100vh', rotateX: -30, scale: 0.8, opacity: 0, z: -500 },
-          {
-            y: 0, rotateX: 0, scale: 1, opacity: 1, z: 0,
-            duration: 0.6, ease: 'power2.inOut',
-            onStart: () => card.classList.add('is-active'),
-            onReverseComplete: () => card.classList.remove('is-active')
-          },
-          i * 0.4 // Reduced from 0.5
-        )
-
-        // Previous cards push back and dim
-        tl.to(cards.slice(0, i), {
-          z: (idx, target) => - (i - idx) * 150,
-          y: (idx) => - (i - idx) * 40,
-          scale: (idx) => 1 - (i - idx) * 0.05,
-          opacity: (idx) => 1 - (i - idx) * 0.3,
-          filter: 'blur(4px)',
-          duration: 0.4,
-          ease: 'power2.inOut'
-        }, i * 0.4) // Reduced from 0.5
-      })
-    })
-    return () => mm.revert()
+      }
+    )
   }, [loading])
 
   return (
@@ -836,14 +880,14 @@ export default function Home() {
               <div className="home-horizontal-titles">
                 <p className="home-eyebrow">Our Mastery</p>
                 <h2>Signature <em>Services</em></h2>
-                <span className="home-index-start">01</span>
+                <span className="home-index-start">{String(activeIndex).padStart(2, '0')}</span>
               </div>
               <div className="home-service-progress">
                 <div className="home-service-rail"><i /></div>
-                <span>06</span>
+                <span>{String(services.length).padStart(2, '0')}</span>
               </div>
             </div>
-            <div ref={serviceTrackRef} className="home-horizontal-track">
+            <div ref={serviceTrackRef} className="home-horizontal-track" onScroll={handleTrackScroll}>
               {services.map((s, i) => (
                 <div key={s.title} className="home-horizontal-card">
                   <img src={s.img} alt={s.title} />
@@ -913,10 +957,9 @@ export default function Home() {
             ))}
           </section>
 
-          {/* 7. TESTIMONIALS CAROUSEL */}
-          <section ref={testimonialsSectionRef} className="section testimonials-section" style={{ position: 'relative', overflow: 'hidden', minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+          <section ref={testimonialsSectionRef} className="section testimonials-section" style={{ position: 'relative', overflow: 'hidden', padding: '100px 0 110px', display: 'flex', alignItems: 'center' }}>
             <div className="testimonials-bg-aura" />
-            <div className="container" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div className="container" style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <div className="home-section-head center">
                 <motion.p
                   initial={{ opacity: 0, y: 20 }}
@@ -935,38 +978,115 @@ export default function Home() {
                   The <em>Experience</em>
                 </motion.h2>
               </div>
-              <div className="home-testimonial-stack" style={{ position: 'relative', height: '500px', width: '100%', display: 'flex', justifyContent: 'center', perspective: '2000px', transformStyle: 'preserve-3d' }}>
-                {testimonials.map((t, i) => (
-                  <motion.div
-                    key={t.author}
-                    className="home-testimonial premium-testimonial-card"
-                    onMouseMove={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect()
-                      const x = e.clientX - rect.left
-                      const y = e.clientY - rect.top
-                      e.currentTarget.style.setProperty('--mouse-x', `${x}px`)
-                      e.currentTarget.style.setProperty('--mouse-y', `${y}px`)
-                    }}
-                    initial={{ opacity: 0, y: 100 }}
-                    style={{
-                      position: 'absolute',
-                      width: 'min(100%, 700px)',
-                      top: 0,
-                      transformStyle: 'preserve-3d',
-                      zIndex: i
-                    }}
-                  >
-                    <div className="card-edge-highlight" />
-                    <div className="value-card-inner">
-                      <div className="testimonial-quote-icon">â€œ</div>
-                      <p>"{t.text}"</p>
-                      <div className="testimonial-footer">
-                        <div className="testimonial-author-line" />
-                        <strong>{t.author}</strong>
+              <div 
+                className="home-testimonial-stack" 
+                onMouseEnter={() => setIsTestimonialHovered(true)}
+                onMouseLeave={() => setIsTestimonialHovered(false)}
+                style={{ 
+                  position: 'relative', 
+                  height: '380px', 
+                  width: '100%', 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  perspective: '2000px', 
+                  transformStyle: 'preserve-3d',
+                  marginTop: '50px'
+                }}
+              >
+                {testimonials.map((t, i) => {
+                  const diff = (i - activeTestimonial + testimonials.length) % testimonials.length;
+                  const isActive = diff === 0;
+                  const isBehind = diff === 1;
+                  const isFarBehind = diff === 2;
+                  
+                  const zIndex = testimonials.length - diff;
+                  
+                  let transform = '';
+                  let opacity = 1;
+                  let filter = 'blur(0px)';
+                  let pointerEvents = 'auto';
+                  
+                  if (isActive) {
+                    transform = 'translate3d(0, 0, 0) scale(1) rotateX(0deg)';
+                    opacity = 1;
+                    filter = 'blur(0px)';
+                    pointerEvents = 'auto';
+                  } else if (isBehind) {
+                    transform = 'translate3d(0, -32px, -150px) scale(0.94) rotateX(-4deg)';
+                    opacity = 0.65;
+                    filter = 'blur(2.5px)';
+                    pointerEvents = 'auto';
+                  } else if (isFarBehind) {
+                    transform = 'translate3d(0, -64px, -300px) scale(0.88) rotateX(-8deg)';
+                    opacity = 0.35;
+                    filter = 'blur(5px)';
+                    pointerEvents = 'auto';
+                  } else {
+                    transform = 'translate3d(0, -90px, -450px) scale(0.82) rotateX(-12deg)';
+                    opacity = 0;
+                    filter = 'blur(8px)';
+                    pointerEvents = 'none';
+                  }
+
+                  return (
+                    <motion.div
+                      key={t.author}
+                      className={`home-testimonial premium-testimonial-card ${isActive ? 'is-active' : ''}`}
+                      onClick={() => setActiveTestimonial(i)}
+                      onMouseMove={(e) => {
+                        const rect = e.currentTarget.getBoundingClientRect()
+                        const x = e.clientX - rect.left
+                        const y = e.clientY - rect.top
+                        e.currentTarget.style.setProperty('--mouse-x', `${x}px`)
+                        e.currentTarget.style.setProperty('--mouse-y', `${y}px`)
+                      }}
+                      style={{
+                        position: 'absolute',
+                        width: 'min(100% - 32px, 700px)',
+                        top: 0,
+                        transformStyle: 'preserve-3d',
+                        transform,
+                        opacity,
+                        filter,
+                        zIndex,
+                        pointerEvents,
+                        cursor: isActive ? 'default' : 'pointer',
+                        transition: 'transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease, filter 0.8s ease',
+                      }}
+                    >
+                      <div className="card-edge-highlight" />
+                      <div className="value-card-inner">
+                        <div className="testimonial-quote-icon">“</div>
+                        <p>"{t.text}"</p>
+                        <div className="testimonial-footer">
+                          <div className="testimonial-author-line" />
+                          <strong>{t.author}</strong>
+                        </div>
                       </div>
-                    </div>
-                    <div className="testimonial-card-glow" />
-                  </motion.div>
+                      <div className="testimonial-card-glow" />
+                    </motion.div>
+                  )
+                })}
+              </div>
+
+              {/* Testimonial Indicators */}
+              <div className="testimonial-indicators" style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '40px' }}>
+                {testimonials.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveTestimonial(idx)}
+                    style={{
+                      width: activeTestimonial === idx ? '24px' : '8px',
+                      height: '8px',
+                      borderRadius: '4px',
+                      border: 'none',
+                      background: activeTestimonial === idx ? 'var(--gold)' : 'rgba(255,255,255,0.15)',
+                      cursor: 'pointer',
+                      transition: 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+                      outline: 'none'
+                    }}
+                    aria-label={`Go to testimonial ${idx + 1}`}
+                  />
                 ))}
               </div>
             </div>
